@@ -53,7 +53,7 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 
 ```text
 ├── app.py                         # 6-Tab Streamlit Interactive VC Diligence Dashboard
-├── cap_table_waterfall.py         # Institutional Cap Table & Liquidation Preference Waterfall Engine
+├── cap_table_waterfall.py         # Cap Table & Liquidation Preference Waterfall Engine
 ├── tech_moat_scanner.py           # Dependency & AST Architecture Auditor
 ├── deck_screener.py               # Quantitative Pitch Deck Screener & IC Memo Generator
 ├── pdf_deck_parser.py             # Binary PDF Pitch Deck Ingestion & Extraction Engine

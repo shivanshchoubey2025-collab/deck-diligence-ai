@@ -5,7 +5,7 @@ Validates:
   2. Conservation of capital (sum of payouts == exit valuation)
   3. No-sub-preference conversion invariant (investor never converts into < 1x preference)
   4. Specific benchmark cases ($40M, $50M, $70M, $100M, $200M)
-  5. 400-Point Sweep Test ($1M to $400M) verifying zero unilateral regret / Nash stability
+  5. 400-Point Sweep Test ($1M to $400M) with an INDEPENDENT ORACLE verifying zero unilateral regret
 """
 
 import pytest
@@ -18,6 +18,45 @@ def engine():
     e = CapTableWaterfallEngine()
     e.build_standard_venture_cap_table()
     return e
+
+
+def independent_oracle_payout(engine: CapTableWaterfallEngine, exit_val: float, converting_names: set) -> dict:
+    """
+    Independent brute-force reference implementation.
+    Does NOT call any engine calculation method.
+    Uses exact fully-diluted cap table share ledger from engine.cap_table.
+    """
+    preferred_holders = sorted(
+        [h for h in engine.cap_table if h["pref_multiple"] > 0],
+        key=lambda x: x["seniority"]
+    )
+    common_holders = [h for h in engine.cap_table if h["pref_multiple"] == 0]
+    
+    cash = exit_val
+    out = {h["name"]: 0.0 for h in engine.cap_table}
+
+    # 1. Non-converting preferred take 1x preference in strict seniority order
+    for h in preferred_holders:
+        name = h["name"]
+        if name not in converting_names:
+            paid = min(cash, h["invested_capital"])
+            out[name] = paid
+            cash -= paid
+
+    # 2. Converting preferred + common share pro-rata in remainder
+    pool_shares = sum(h["shares"] for h in common_holders)
+    for h in preferred_holders:
+        if h["name"] in converting_names:
+            pool_shares += h["shares"]
+
+    if cash > 0 and pool_shares > 0:
+        for h in common_holders:
+            out[h["name"]] = (h["shares"] / pool_shares) * cash
+        for h in preferred_holders:
+            if h["name"] in converting_names:
+                out[h["name"]] = (h["shares"] / pool_shares) * cash
+
+    return out
 
 
 def test_cap_table_dilution_sums_to_100(engine):
@@ -48,7 +87,7 @@ def test_no_sub_preference_conversion_invariant(engine):
 
 def test_400_point_nash_equilibrium_sweep(engine):
     """
-    Independent 400-Point Sweep from $1M to $400M.
+    Independent 400-Point Sweep from $1M to $400M against an INDEPENDENT ORACLE.
     Verifies that for every exit valuation, NO preferred investor has unilateral regret:
     Deviating from their conversion decision yields <= their current payout.
     """
@@ -63,25 +102,25 @@ def test_400_point_nash_equilibrium_sweep(engine):
         # 1. Total conservation
         assert sum(p.proceeds_usd for p in payouts) == pytest.approx(exit_val, rel=1e-5)
 
-        # 2. Bilateral Unilateral Non-Regret Check
+        # 2. Bilateral Unilateral Non-Regret Check using INDEPENDENT ORACLE
         for name in preferred_names:
             p_actual = payout_map[name].proceeds_usd
 
             if name in converting_set:
-                # If converted: what if they deviated to preference?
+                # If converted: what if they deviated to preference under the oracle?
                 deviated_set = converting_set - {name}
-                dev_payouts = engine._simulate_payout_for_state(exit_val, deviated_set)
+                dev_payouts = independent_oracle_payout(engine, exit_val, deviated_set)
                 p_dev = dev_payouts[name]
                 assert p_actual >= p_dev - 1e-4, (
-                    f"Investor {name} has regret converting at ${exit_val/1e6:.2f}M: actual ${p_actual:,.0f} < dev ${p_dev:,.0f}"
+                    f"Investor {name} has regret converting at ${exit_val/1e6:.2f}M: actual ${p_actual:,.0f} < oracle dev ${p_dev:,.0f}"
                 )
             else:
-                # If taking preference: what if they deviated to converting?
+                # If taking preference: what if they deviated to converting under the oracle?
                 deviated_set = converting_set | {name}
-                dev_payouts = engine._simulate_payout_for_state(exit_val, deviated_set)
+                dev_payouts = independent_oracle_payout(engine, exit_val, deviated_set)
                 p_dev = dev_payouts[name]
                 assert p_actual >= p_dev - 1e-4, (
-                    f"Investor {name} has regret taking pref at ${exit_val/1e6:.2f}M: actual ${p_actual:,.0f} < dev ${p_dev:,.0f}"
+                    f"Investor {name} has regret taking pref at ${exit_val/1e6:.2f}M: actual ${p_actual:,.0f} < oracle dev ${p_dev:,.0f}"
                 )
 
 

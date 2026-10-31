@@ -240,18 +240,18 @@ class CapTableWaterfallEngine:
         # 1X NON-PARTICIPATING PREFERRED (TRUE NASH EQUILIBRIUM SOLVER)
         # -----------------------------------------------------------------
         # Step 1: Precompute payouts for all 2^N states (N=3 -> 8 states)
-        all_states: Dict[Tuple[str, ...], Dict[str, float]] = {}
+        all_states: Dict[frozenset, Dict[str, float]] = {}
         for r in range(len(pref_names) + 1):
             for subset in itertools.combinations(pref_names, r):
-                all_states[subset] = self._simulate_payout_for_state(exit_valuation_usd, set(subset))
+                all_states[frozenset(subset)] = self._simulate_payout_for_state(exit_valuation_usd, set(subset))
 
         # Step 2: Identify Pure Strategy Nash Equilibria
         # An equilibrium state S satisfies: for all preferred investors h,
         # Payout(h in S) >= Payout(h in S_deviate)
         nash_equilibria: List[Tuple[Set[str], Dict[str, float]]] = []
 
-        for subset, state_payouts in all_states.items():
-            current_converting = set(subset)
+        for f_subset, state_payouts in all_states.items():
+            current_converting = set(f_subset)
             is_nash = True
 
             for h in preferred_classes:
@@ -261,16 +261,14 @@ class CapTableWaterfallEngine:
                 # If currently converting, test unilateral deviation to preference
                 if name in current_converting:
                     deviated_set = current_converting - {name}
-                    deviated_subset = tuple(sorted(list(deviated_set)))
-                    pay_if_deviate = all_states[deviated_subset][name]
+                    pay_if_deviate = all_states[frozenset(deviated_set)][name]
                     if pay_if_deviate > current_pay + 1e-4:
                         is_nash = False
                         break
                 else:
                     # If currently in preference, test unilateral deviation to converting
                     deviated_set = current_converting | {name}
-                    deviated_subset = tuple(sorted(list(deviated_set)))
-                    pay_if_deviate = all_states[deviated_subset][name]
+                    pay_if_deviate = all_states[frozenset(deviated_set)][name]
                     if pay_if_deviate > current_pay + 1e-4:
                         is_nash = False
                         break
@@ -279,16 +277,14 @@ class CapTableWaterfallEngine:
                 nash_equilibria.append((current_converting, state_payouts))
 
         # Step 3: Tie-breaking among equilibria
-        # If multiple equilibria exist (when indifferent at low exit values):
-        # Default to retaining liquidation preference (safest legal claim) -> min len(converting)
+        # If multiple equilibria exist (when indifferent at equal payouts):
+        # Prefer the state that maximizes total investor payout; if tied, retain preference (smaller converting set)
         if nash_equilibria:
-            # Sort by: 1) Investor preference priority (min converting when indifferent), 2) Max total preferred payout
-            best_conversions, best_payouts = min(
+            best_conversions, best_payouts = max(
                 nash_equilibria,
-                key=lambda x: (len(x[0]), -sum(x[1][name] for name in pref_names))
+                key=lambda x: (sum(x[1][name] for name in pref_names), -len(x[0]))
             )
         else:
-            # Fallback: All preferred take preference
             best_conversions = set()
             best_payouts = self._simulate_payout_for_state(exit_valuation_usd, set())
 

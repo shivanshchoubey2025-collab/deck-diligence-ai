@@ -812,7 +812,7 @@ with tab4:
 with tab5:
     st.subheader("💰 Tier-1 Cap Table Dilution & Liquidation Preference Waterfall")
     st.markdown(
-        "Institutional exit proceeds modeler across multi-round financing tranches (Seed → Series A → Series B). "
+        "Venture exit proceeds modeler across multi-round financing tranches (Seed → Series A → Series B). "
         "Evaluates **1x Non-Participating vs. Participating Preferred**, conversion crossover hurdles, and downside preference floors."
     )
 
@@ -1014,7 +1014,7 @@ with tab5:
         st.altair_chart(chart, use_container_width=True)
 
     # 5. Multi-Exit Scenario Simulation Matrix ($10M to $1 Billion)
-    st.markdown("#### 🌐 Institutional Multi-Exit Return Matrix ($10M to $1,000M)")
+    st.markdown("#### 🌐 Multi-Exit Scenario Return Matrix ($10M to $1,000M)")
     st.write("Cross-evaluating proceeds and cash-on-cash multiples across typical exit outcomes:")
 
     scenarios = [10_000_000, 25_000_000, 50_000_000, 100_000_000, 200_000_000, 350_000_000, 500_000_000, 1_000_000_000]

@@ -153,7 +153,7 @@ class PitchDeckScreener:
                 severity="YELLOW",
                 title=f"Undisclosed Metrics in Pitch Deck ({len(self.missing_metrics)} missing)",
                 finding=f"The pitch deck does not disclose: {', '.join(self.missing_metrics)}.",
-                benchmark="Institutional decks disclose ARR, CAC, monthly gross margin, net burn, and customer churn.",
+                benchmark="Standard venture decks disclose ARR, CAC, monthly gross margin, net burn, and customer churn.",
                 impact="Requires preliminary diligence call to populate baseline unit economics before Investment Committee review."
             ))
 
@@ -444,7 +444,7 @@ class PitchDeckScreener:
 
 ### 2. QUANTITATIVE UNIT ECONOMICS BENCHMARKING
 
-| Metric | Startup Claim | Institutional Benchmark | Status |
+| Metric | Startup Claim | Venture Benchmark | Status |
 | :--- | :--- | :--- | :--- |
 | **ARR / Revenue** | {f"${self.computed['arr']/1e6:.2f}M" if self.computed.get('arr') is not None else "N/A"} | > $1.0M for Series A | {'🟢 Disclosed' if self.computed.get('arr') is not None else '⚠️ Undisclosed (Data Gap)'} |
 | **Gross Margin** | {f"{self.computed['gross_margin']*100:.1f}%" if self.computed.get('gross_margin') is not None else "N/A"} | >= 75% for Enterprise Software | {'⚠️ Undisclosed (Data Gap)' if self.computed.get('gross_margin') is None else ('🟢 Pass' if self.computed['gross_margin'] >= 0.75 else '🚨 Breached')} |
