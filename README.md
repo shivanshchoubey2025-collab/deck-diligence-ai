@@ -1,39 +1,46 @@
-# Venture Capital Diligence & Screening Engine (DeckDiligence.ai)
+# DeckDiligence.ai — Venture Capital Screening & Tech Due Diligence Copilot
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.42%2B-FF4B4B.svg?logo=streamlit)](https://streamlit.io)
-[![Focus](https://img.shields.io/badge/Domain-Venture%20Capital%20%26%20Tech%20Diligence-emerald.svg)](https://github.com)
-[![License](https://img.shields.io/badge/License-MIT-orange.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-12%20Passed-brightgreen.svg)](test_cap_table_waterfall.py)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An institutional-grade **Venture Capital Diligence & Tech Audit Platform** engineered for Tier-1 Venture Capital firms (Peak XV, Founders Fund, Accel, Lightspeed, Bessemer). Designed to automate pitch deck ingestion, uncover economic and unit-economic red flags, audit codebase technical defensibility (AI wrapper vs. proprietary systems moat), and simulate multi-round cap table dilution and liquidation preference exit waterfalls ($5M to $1 Billion).
+An open-source **Venture Capital Diligence & Screening Copilot** designed for early-stage B2B SaaS, developer tools, and AI startups. Benchmarked against established venture underwriting frameworks (Craft Ventures, Bessemer Cloud Index, Y Combinator, and NVCA standards).
+
+The engine automates preliminary pitch deck sanity auditing, analyzes dependency manifests via Python AST parsing to assess OpenAI API pass-through risk, and simulates multi-round cap table dilution and liquidation preference waterfalls ($5M to $1 Billion).
 
 ---
 
-## 🏛️ Core Architectural Pillars & Features
+## 🏛️ Core Modules & Functionality
 
-DeckDiligence.ai is organized into **4 Tier-1 Venture Upgrades**:
+### 1. 🔍 Heuristic Pitch Deck Auditor (`deck_screener.py`)
+- Cross-references claimed startup metrics against venture benchmarks:
+  - **TAM Reality Check**: Flags top-down vs. bottom-up market sizing disconnects ($>10\times$ disparity triggers red flag).
+  - **Gross Margin Diligence**: Flags pure API pass-through GenAI wrappers claiming $>80\%$ gross margins without local inference layers.
+  - **CAC Payback Velocity**: Categorizes customer acquisition payback into $<12\text{ mo}$ (Elite), $12\text{--}18\text{ mo}$ (Moderate), and $>18\text{ mo}$ (Sluggish).
+  - **Burn Multiple (David Sacks / Craft Ventures)**: Evaluates capital efficiency ($\text{Annual Net Burn} / \text{Net New ARR}$) across $\le 1.0\times$ (Elite), $1.0\times\text{--}2.0\times$ (Acceptable), and $>2.0\times$ (Inefficient).
+  - **Data Disclosure Gaps**: Explicitly flags omitted unit economics rather than fabricating benign fallback defaults.
+- Generates a structured **1-Page Investment Committee (IC) Screening Memo** in Markdown.
 
-### 1. 🔍 Heuristic Bullshit Detector & 11-Slide Deck Studio (`deck_screener.py`, `app.py`)
-- Cross-references claimed metrics against institutional venture benchmarks (Bessemer, Craft Ventures, YC).
-- Implements the **6-Point Sanity Audit**: TAM validation, token COGS gross margin ceiling, CAC payback velocity, Burn Multiple ($Net\ Burn / Net\ New\ ARR$), ARR multiple discipline, and technical founder leverage.
-- Interactive 11-Slide Deck Studio rendering Sequoia-style executive slides with dynamic metric overlays.
+### 2. 🔬 Dependency & AST Architecture Auditor (`tech_moat_scanner.py`)
+- Uses Python's standard `ast` module (`ast.NodeVisitor`) to inspect verified code import sites (`ast.Import`, `ast.ImportFrom`), ignoring comments and string documentation.
+- Scans `requirements.txt`, `package.json`, and source code to identify pass-through wrappers (LangChain, OpenAI, CrewAI) vs. native systems/deeptech layers (vLLM, Triton, PyTorch, bcc/eBPF, Ray).
+- Computes an **AI Wrapper Index (%)**, platform commoditization risk, and benchmarked gross margin ceilings (50–65% for pure API wrappers vs. 75–85% for self-hosted/hybrid compute).
 
-### 2. 📑 End-to-End PDF Pitch Deck Ingestion & VC Generator (`pdf_deck_parser.py`, `generate_sample_pdf_deck.py`)
-- Direct ingestion and parsing of binary PDF pitch decks using structured regex and page extraction.
-- Automatic extraction of ARR, burn rate, cash runaway, TAM, customer count, and round terms.
-- Bundled ReportLab generator producing `Sample_Pitch_Deck_CogniFlow.pdf`, a dark-mode 16:9 executive presentation formatted for institutional Investment Committees.
+### 3. 💰 Cap Table Dilution & Liquidation Preference Waterfall (`cap_table_waterfall.py`)
+- Models multi-round equity progression: **Founders (100%) → Seed ($2.5M) → Series A ($10M) → Series B ($25M)** with unallocated option pool (ESOP) dilution.
+- Executes an **equilibrium-based liquidation preference waterfall** across all $2^N$ conversion states:
+  - **1x Non-Participating Preferred**: Solves the exact conversion equilibrium ensuring no preferred investor rationally converts into less than their 1x preference.
+  - **1x Participating Preferred ("Double Dipping")**: Simulates off-market terms where investors take 1x preference plus pro-rata common proceeds.
+  - Computes the aggregate **$37.5M Senior Preference Stack Floor** where common stock is wiped out at exits $\le \$37.5\text{M}$.
 
-### 3. 🔬 Tier-1 Tech Moat & AI Wrapper Code Scanner (`tech_moat_scanner.py`)
-- Institutional code audit engine analyzing repository dependencies (`requirements.txt`, `pyproject.toml`) and source files (`main.py`, backend pipelines).
-- Calculates the **AI Wrapper Index (%)**, **OpenAI Extinction Risk Level**, **Gross Margin Ceiling Cap (%)**, and **Defensibility Score (0-100)**.
-- Distinguishes superficial third-party API pass-through wrappers (LangChain, OpenAI, LiteLLM) from true proprietary deeptech infrastructure (vLLM, TensorRT-LLM, Triton, ONNX Runtime, eBPF, Ray).
+---
 
-### 4. 💰 Cap Table Dilution & Liquidation Preference Exit Waterfall (`cap_table_waterfall.py`)
-- Models multi-round equity dilution progression: **Founders (100%) → Seed ($2.5M) → Series A ($10M) → Series B ($25M)** with option pool (ESOP) shuffle dynamics.
-- Implements senior-to-junior liquidation preference waterwalls:
-  - **1x Non-Participating Preferred (NVCA Standard)**: Automatically models the **Conversion Crossover Hurdle** ($X^* = \text{Invested} / \text{Ownership}\%$) where preferred converts to common.
-  - **1x Participating Preferred ("Double Dipping")**: Simulates aggressive term sheets where investors take preference plus pro-rata common pool.
-- Computes aggregate **$37.5M Downside Preference Stack** and runs multi-exit scenarios ($10M, $25M, $50M, $100M, $200M, $350M, $500M, $1 Billion) with Multiple on Invested Capital (MoIC) across all tranches.
+## ⚠️ Diligence Limitations & Scope Boundaries
+
+1. **Preliminary Quantitative Filter**: This tool is designed for top-of-funnel screening and Investment Committee memo preparation. It does not replace qualitative customer reference calls, founder background checks, or commercial diligence.
+2. **Architectural vs. Business Moats**: Dependency and AST scanning measures technical architecture, inference cost exposure, and foundation model dependency. It cannot measure commercial moats such as high switching costs, regulatory licensing, enterprise workflow stickiness, or proprietary dataset network effects.
+3. **Conversion Crossover Interpretation**: The standard theoretical crossover formula ($X^* = \text{Invested} / \text{Ownership}\%$) represents the hurdle when all preferred shareholders convert. For mixed-outcome exits, the engine models the full equilibrium across seniority tranches.
 
 ---
 
@@ -42,76 +49,50 @@ DeckDiligence.ai is organized into **4 Tier-1 Venture Upgrades**:
 ```text
 ├── app.py                         # 6-Tab Streamlit Interactive VC Diligence Dashboard
 ├── cap_table_waterfall.py         # Institutional Cap Table & Liquidation Preference Waterfall Engine
-├── tech_moat_scanner.py           # AST & Dependency Tech Moat & AI Wrapper Auditor
+├── tech_moat_scanner.py           # Dependency & AST Architecture Auditor
+├── deck_screener.py               # 6-Point Heuristic Pitch Deck Auditor & IC Memo Generator
 ├── pdf_deck_parser.py             # Binary PDF Pitch Deck Ingestion & Extraction Engine
 ├── generate_sample_pdf_deck.py    # ReportLab 16:9 Landscape Dark-Mode Pitch Deck Generator
-├── Sample_Pitch_Deck_CogniFlow.pdf# Generated 11-Slide Institutional PDF Pitch Deck
-├── deck_screener.py               # 6-Point Heuristic Sanity Auditor & IC Memo Generator
-├── vc_metrics_modeler.py          # SaaS Venture Economics & Power Law Fund Return Engine
-├── valuation_engine.py            # Indian Equities DCF & WACC Sensitivity Modeler
-├── sample_deck_cogniflow.json     # Benchmark Pitch Deck 1: High-conviction AI infrastructure
-├── sample_deck_fluff.json         # Benchmark Pitch Deck 2: Hype-driven AI wrapper
-├── IC_Screening_Memo_CogniFlow.md # Generated 1-Page Investment Committee Screening Memo (Invest)
-├── IC_Screening_Memo_HyperBuzz.md # Generated 1-Page Investment Committee Screening Memo (Pass)
-├── vc_resume_template.md          # WSO/Harvard 1-page VC Candidate Resume template
-├── cold_outreach_templates.md     # High-conversion cold email templates for Indian VCs
-└── requirements.txt               # Locked Python dependencies
+├── Sample_Pitch_Deck_CogniFlow.pdf# Generated 11-Slide Benchmark PDF Pitch Deck
+├── sample_deck_cogniflow.json     # Test Case 1: High-conviction AI infrastructure
+├── sample_deck_fluff.json         # Test Case 2: Hype-driven AI wrapper
+├── test_cap_table_waterfall.py    # Unit tests for Cap Table & Waterfall Engine
+├── test_deck_screener.py          # Unit tests for Pitch Deck Screener & Sanity Auditor
+├── test_tech_moat_scanner.py      # Unit tests for AST & Dependency Auditor
+├── requirements.txt               # Pinned dependencies
+├── LICENSE                        # MIT License
+└── README.md                     # Documentation
 ```
 
 ---
 
-## 🚀 Running the Interactive Dashboard (Streamlit)
+## 🧪 Running the Unit Test Suite
 
-Launch the interactive dark-mode dashboard in your browser:
+Run the full pytest suite (12 test cases covering mathematical invariants, AST parsing, and threshold boundaries):
 
-```powershell
-cd C:\Users\harsh\.gemini\antigravity\scratch\finance_career_transition
-.\.venv\Scripts\streamlit run app.py
+```bash
+pytest -v
+```
+
+---
+
+## 🚀 Running the Interactive Web Dashboard (Streamlit)
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
 ```
 
 ### Dashboard Tabs:
-1. **🔍 Heuristic Bullshit Detector**: Red flags, unit economics audits, and VC benchmark alerts.
-2. **📊 Core Venture Metrics**: LTV/CAC, Payback months, NDR, Magic Number, and David Sacks Burn Multiple.
-3. **🎴 11-Slide Deck Studio**: 16:9 executive presentation cards with real-time financial overrides.
-4. **🔬 Tech Moat Code Scanner**: Automated dependency audit, Wrapper Index %, and Gross Margin ceiling.
-5. **💰 Cap Table & Exit Waterfall**: Interactive Exit Slider ($5M–$1B), 1x Non-Participating vs Participating toggles, conversion crossover hurdles, and shareholder return charts.
-6. **📄 1-Page Investment Memo**: Instant institutional markdown IC memo with 1-click download.
+1. **🔍 Heuristic Bullshit Detector**: Red flags, data disclosure gaps, and unit economics audits.
+2. **📊 Core Venture Metrics**: LTV/CAC, Payback months, NDR, Magic Number, and Burn Multiple.
+3. **🎴 11-Slide Deck Studio**: 16:9 presentation slides with real-time financial overrides.
+4. **🔬 Tech Moat Code Scanner**: Dependency AST analysis, Wrapper Index %, and Gross Margin ceiling.
+5. **💰 Cap Table & Exit Waterfall**: Interactive Exit Slider ($5M–$1B), 1x Non-Participating vs. Participating toggles, and payout ledgers.
+6. **📄 1-Page Investment Memo**: Instant markdown IC memo with 1-click download.
 
 ---
 
-## ⚡ Running Standalone CLI Engines
+## 📄 License
 
-### Cap Table & Exit Waterfall Engine
-```powershell
-.\.venv\Scripts\python cap_table_waterfall.py
-```
-
-### Tech Moat Code Scanner
-```powershell
-.\.venv\Scripts\python tech_moat_scanner.py
-```
-
-### PDF Deck Ingestion & ReportLab Generation
-```powershell
-.\.venv\Scripts\python generate_sample_pdf_deck.py
-.\.venv\Scripts\python pdf_deck_parser.py
-```
-
-### SaaS Economics & Power Law Fund Math
-```powershell
-.\.venv\Scripts\python vc_metrics_modeler.py
-```
-
-### Indian Equities DCF Valuation Engine
-```powershell
-.\.venv\Scripts\python valuation_engine.py
-```
-
----
-
-## 👤 Author
-
-**Shivansh Choubey**  
-- GitHub: [@shivanshchoubey2025-collab](https://github.com/shivanshchoubey2025-collab)  
-- Focus: Computer Science & Engineering, Tech Due Diligence, Venture Capital  
-- Institution: Vellore Institute of Technology (VIT), Chennai
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

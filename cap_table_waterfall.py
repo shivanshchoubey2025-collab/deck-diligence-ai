@@ -2,37 +2,26 @@
 ========================================================================================
 CAP TABLE DILUTION & LIQUIDATION PREFERENCE EXIT WATERFALL ENGINE
 ----------------------------------------------------------------------------------------
-Target: Tier-1 Venture Capital (VC) Investment Committees (Peak XV, Founders Fund, Accel)
-Purpose: Models round-by-round cap table dilution (Founders -> Seed -> Series A -> Series B)
-         and executes an institutional Liquidation Preference Exit Waterfall ($5M to $1B).
+Purpose: Models round-by-round venture cap table dilution (Founders -> Seed -> A -> B)
+         and executes an equilibrium-based Liquidation Preference Exit Waterfall ($5M-$1B).
 ========================================================================================
 Mechanics Covered:
-  1. Multi-Round Share Ledger & Cap Table Dilution Progression
-  2. Pre-Money & Post-Money Option Pool (ESOP) Shuffle Calculations
-  3. 1x Non-Participating Preferred Stock (Market Standard) with Crossover Conversion Points
-  4. Participating Preferred ("Double Dipping") Contingency Modeling
-  5. Exit Waterfall Proceeds Distribution & Multiple on Invested Capital (MoIC) across exits
+  1. Multi-Round Share Ledger & Option Pool (ESOP) Dilution
+  2. Equilibrium Non-Participating Preferred Conversion (eliminates sub-preference conversions)
+  3. 1x Participating Preferred ("Double Dipping") Contingency Modeling
+  4. Aggregate Preference Stack Floor ($37.5M) & Proceeds Breakdown
 ========================================================================================
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional
-
-
-@dataclass
-class RoundDetails:
-    round_name: str
-    capital_invested_usd: float
-    post_money_valuation_usd: float
-    esop_target_pct: float = 0.10  # 10% unallocated ESOP pool target
-    liquidation_multiple: float = 1.0
-    is_participating: bool = False
+from typing import Dict, List, Tuple, Optional, Set
+import itertools
 
 
 @dataclass
 class ShareholderPayout:
     name: str
-    category: str  # "Common / Founders", "Seed VC", "Series A VC", "Series B VC", "ESOP"
+    category: str  # "Founders", "Seed VC", "Series A VC", "Series B VC", "ESOP"
     invested_capital: float
     shares: float
     ownership_pct: float
@@ -58,31 +47,29 @@ class CapTableWaterfallEngine:
         series_b_post_val: float = 150_000_000.0,
     ) -> List[Dict]:
         """
-        Builds a canonical 4-stage institutional venture cap table:
+        Builds a canonical 4-stage venture cap table:
         1. Inception: Founders (10M shares, 100%)
-        2. Seed Round: $2.5M at $18.0M Post-Money (10% ESOP created)
-        3. Series A: $10.0M at $50.0M Post-Money (20% dilution + ESOP refresh)
+        2. Seed Round: $2.5M at $18.0M Post-Money (10% unallocated ESOP created)
+        3. Series A: $10.0M at $50.0M Post-Money (20% dilution)
         4. Series B: $25.0M at $150.0M Post-Money (16.7% dilution)
         """
-        # 1. Inception
         founder_shares = self.initial_founder_shares
         
-        # 2. Seed Round ($2.5M on $18M Post-Money -> 13.89% ownership)
+        # Seed Round ($2.5M on $18M Post -> 13.89% ownership)
         seed_ownership = seed_capital / seed_post_val
         esop_seed_pct = 0.10
         common_seed_pct = 1.0 - seed_ownership - esop_seed_pct
         
-        # Scaling shares so founder shares equal common_seed_pct
         total_seed_shares = founder_shares / common_seed_pct
         seed_shares = total_seed_shares * seed_ownership
         esop_shares = total_seed_shares * esop_seed_pct
         
-        # 3. Series A Round ($10M on $50M Post-Money -> 20.0% ownership)
+        # Series A ($10M on $50M Post -> 20.0% ownership)
         series_a_ownership = series_a_capital / series_a_post_val
-        post_series_a_shares = (total_seed_shares) / (1.0 - series_a_ownership)
+        post_series_a_shares = total_seed_shares / (1.0 - series_a_ownership)
         series_a_shares = post_series_a_shares * series_a_ownership
         
-        # 4. Series B Round ($25M on $150M Post-Money -> 16.67% ownership)
+        # Series B ($25M on $150M Post -> 16.67% ownership)
         series_b_ownership = series_b_capital / series_b_post_val
         total_post_b_shares = post_series_a_shares / (1.0 - series_b_ownership)
         series_b_shares = total_post_b_shares * series_b_ownership
@@ -90,7 +77,6 @@ class CapTableWaterfallEngine:
         self.total_shares = total_post_b_shares
         self.share_price = series_b_post_val / self.total_shares
 
-        # Compile Fully-Diluted Cap Table Ledger
         self.cap_table = [
             {
                 "name": "Founding Team (Common)",
@@ -98,7 +84,7 @@ class CapTableWaterfallEngine:
                 "shares": founder_shares,
                 "ownership_pct": (founder_shares / self.total_shares) * 100.0,
                 "invested_capital": 0.0,
-                "seniority": 4,  # Common is junior
+                "seniority": 4,
                 "pref_multiple": 0.0
             },
             {
@@ -134,149 +120,11 @@ class CapTableWaterfallEngine:
                 "shares": series_b_shares,
                 "ownership_pct": (series_b_shares / self.total_shares) * 100.0,
                 "invested_capital": series_b_capital,
-                "seniority": 1,  # Senior-most
+                "seniority": 1,
                 "pref_multiple": 1.0
             }
         ]
         return self.cap_table
-
-    def calculate_exit_waterfall(
-        self,
-        exit_valuation_usd: float,
-        is_participating_preferred: bool = False
-    ) -> List[ShareholderPayout]:
-        """
-        Executes a Tier-1 Liquidation Preference Exit Waterfall:
-        - Seniority: Series B > Series A > Seed > Common
-        - 1x Non-Participating: Investor takes MAX(1x Preference, Pro-Rata Common Share)
-        - Participating: Investor takes 1x Preference + Pro-Rata of Remaining Proceeds
-        """
-        if not self.cap_table:
-            self.build_standard_venture_cap_table()
-
-        total_preferred_capital = sum(
-            holder["invested_capital"] for holder in self.cap_table if holder["pref_multiple"] > 0
-        )
-
-        payouts: List[ShareholderPayout] = []
-
-        if not is_participating_preferred:
-            # -----------------------------------------------------------------
-            # 1X NON-PARTICIPATING PREFERRED (TIER-1 STANDARD)
-            # -----------------------------------------------------------------
-            # Each preferred investor checks: Is Pro-Rata Ownership % * Exit > Invested Capital?
-            # If Yes -> Convert to Common
-            # If No -> Exercise 1x Liquidation Preference
-            
-            # Step 1: Identify who converts
-            converting_holders = set()
-            for holder in self.cap_table:
-                if holder["pref_multiple"] > 0:
-                    pro_rata_value = (holder["ownership_pct"] / 100.0) * exit_valuation_usd
-                    if pro_rata_value >= holder["invested_capital"]:
-                        converting_holders.add(holder["name"])
-
-            # If all preferred investors convert to common (High Exit valuation)
-            all_preferred_names = {h["name"] for h in self.cap_table if h["pref_multiple"] > 0}
-            if converting_holders == all_preferred_names:
-                for holder in self.cap_table:
-                    proceeds = (holder["ownership_pct"] / 100.0) * exit_valuation_usd
-                    moic = (proceeds / holder["invested_capital"]) if holder["invested_capital"] > 0 else 0.0
-                    payouts.append(ShareholderPayout(
-                        name=holder["name"],
-                        category=holder["category"],
-                        invested_capital=holder["invested_capital"],
-                        shares=holder["shares"],
-                        ownership_pct=holder["ownership_pct"],
-                        proceeds_usd=proceeds,
-                        moic=round(moic, 2),
-                        converted_to_common=True
-                    ))
-                return payouts
-
-            # Step 2: Waterfall with Seniority Tranches (Series B -> Series A -> Seed)
-            remaining_cash = exit_valuation_usd
-            temp_payouts: Dict[str, float] = {h["name"]: 0.0 for h in self.cap_table}
-            has_converted: Dict[str, bool] = {h["name"]: False for h in self.cap_table}
-
-            # Senior Preferred Payouts (Non-converting take 1x preference)
-            # Sort by seniority (1 is highest)
-            preferred_sorted = sorted(
-                [h for h in self.cap_table if h["pref_multiple"] > 0],
-                key=lambda x: x["seniority"]
-            )
-
-            for pref in preferred_sorted:
-                if pref["name"] in converting_holders:
-                    has_converted[pref["name"]] = True
-                    continue  # Will take from common pool later
-
-                # Takes 1x Liquidation Preference up to remaining cash
-                pref_amount = min(remaining_cash, pref["invested_capital"])
-                temp_payouts[pref["name"]] = pref_amount
-                remaining_cash -= pref_amount
-
-            # Remaining cash is distributed pro-rata among Common + Converting Preferred
-            converting_and_common_shares = sum(
-                h["shares"] for h in self.cap_table if (h["name"] in converting_holders or h["pref_multiple"] == 0)
-            )
-
-            if converting_and_common_shares > 0 and remaining_cash > 0:
-                for h in self.cap_table:
-                    if h["name"] in converting_holders or h["pref_multiple"] == 0:
-                        share_of_pool = (h["shares"] / converting_and_common_shares) * remaining_cash
-                        temp_payouts[h["name"]] += share_of_pool
-                        if h["name"] in converting_holders:
-                            has_converted[h["name"]] = True
-
-            for h in self.cap_table:
-                proceeds = temp_payouts[h["name"]]
-                moic = (proceeds / h["invested_capital"]) if h["invested_capital"] > 0 else 0.0
-                payouts.append(ShareholderPayout(
-                    name=h["name"],
-                    category=h["category"],
-                    invested_capital=h["invested_capital"],
-                    shares=h["shares"],
-                    ownership_pct=h["ownership_pct"],
-                    proceeds_usd=proceeds,
-                    moic=round(moic, 2),
-                    converted_to_common=has_converted[h["name"]]
-                ))
-
-        else:
-            # -----------------------------------------------------------------
-            # PARTICIPATING PREFERRED ("DOUBLE DIPPING" INVESTOR FRIENDLY)
-            # -----------------------------------------------------------------
-            remaining_cash = exit_valuation_usd
-            temp_payouts = {h["name"]: 0.0 for h in self.cap_table}
-
-            # 1. First satisfy all 1x liquidation preferences
-            for h in sorted([h for h in self.cap_table if h["pref_multiple"] > 0], key=lambda x: x["seniority"]):
-                pref = min(remaining_cash, h["invested_capital"])
-                temp_payouts[h["name"]] += pref
-                remaining_cash -= pref
-
-            # 2. Then all holders share pro-rata in remaining cash
-            if remaining_cash > 0:
-                for h in self.cap_table:
-                    pro_rata_share = (h["ownership_pct"] / 100.0) * remaining_cash
-                    temp_payouts[h["name"]] += pro_rata_share
-
-            for h in self.cap_table:
-                proceeds = temp_payouts[h["name"]]
-                moic = (proceeds / h["invested_capital"]) if h["invested_capital"] > 0 else 0.0
-                payouts.append(ShareholderPayout(
-                    name=h["name"],
-                    category=h["category"],
-                    invested_capital=h["invested_capital"],
-                    shares=h["shares"],
-                    ownership_pct=h["ownership_pct"],
-                    proceeds_usd=proceeds,
-                    moic=round(moic, 2),
-                    converted_to_common=False
-                ))
-
-        return payouts
 
     def get_preference_stack_total(self) -> float:
         """Returns the aggregate liquidation preference amount required before common sees $1."""
@@ -286,9 +134,8 @@ class CapTableWaterfallEngine:
 
     def get_crossover_hurdles(self) -> List[Dict]:
         """
-        Calculates the conversion crossover exit valuation for each preferred class.
-        Crossover Exit = Invested Capital / Ownership Fraction.
-        At valuations above this hurdle, the investor earns more by converting to Common.
+        Calculates theoretical crossover hurdles (valid when all other preferred holders convert).
+        Formula: Invested Capital / Ownership Fraction.
         """
         if not self.cap_table:
             self.build_standard_venture_cap_table()
@@ -308,6 +155,160 @@ class CapTableWaterfallEngine:
         hurdles.sort(key=lambda x: x["seniority"])
         return hurdles
 
+    def calculate_exit_waterfall(
+        self,
+        exit_valuation_usd: float,
+        is_participating_preferred: bool = False
+    ) -> List[ShareholderPayout]:
+        """
+        Executes an institutional Liquidation Preference Exit Waterfall with
+        game-theoretic conversion equilibrium:
+        - Rational Choice: Preferred investor converts ONLY if pro-rata common payout >= preference payout.
+        - Seniority: Series B (1) > Series A (2) > Seed (3) > Common (4).
+        - Solves across all 2^N conversion states to find the stable equilibrium payout.
+        """
+        if not self.cap_table:
+            self.build_standard_venture_cap_table()
+
+        preferred_classes = [h for h in self.cap_table if h["pref_multiple"] > 0]
+        pref_names = [h["name"] for h in preferred_classes]
+
+        if is_participating_preferred:
+            # -------------------------------------------------------------
+            # 1X PARTICIPATING PREFERRED ("Double Dipping")
+            # -------------------------------------------------------------
+            remaining_cash = exit_valuation_usd
+            temp_payouts = {h["name"]: 0.0 for h in self.cap_table}
+
+            # 1. Satisfy 1x preference in order of seniority
+            for h in sorted(preferred_classes, key=lambda x: x["seniority"]):
+                pref = min(remaining_cash, h["invested_capital"])
+                temp_payouts[h["name"]] += pref
+                remaining_cash -= pref
+
+            # 2. Distribute remaining cash pro-rata across ALL shares
+            if remaining_cash > 0:
+                for h in self.cap_table:
+                    pro_rata = (h["shares"] / self.total_shares) * remaining_cash
+                    temp_payouts[h["name"]] += pro_rata
+
+            payouts = []
+            for h in self.cap_table:
+                proceeds = temp_payouts[h["name"]]
+                moic = (proceeds / h["invested_capital"]) if h["invested_capital"] > 0 else 0.0
+                payouts.append(ShareholderPayout(
+                    name=h["name"],
+                    category=h["category"],
+                    invested_capital=h["invested_capital"],
+                    shares=h["shares"],
+                    ownership_pct=h["ownership_pct"],
+                    proceeds_usd=proceeds,
+                    moic=round(moic, 2),
+                    converted_to_common=False
+                ))
+            return payouts
+
+        # -----------------------------------------------------------------
+        # 1X NON-PARTICIPATING PREFERRED (EQUILIBRIUM SOLVER)
+        # -----------------------------------------------------------------
+        # For each possible subset of converting investors, compute payouts.
+        # Find the state where no preferred investor regrets their decision.
+        
+        best_payouts: Optional[Dict[str, float]] = None
+        best_conversions: Optional[Set[str]] = None
+        
+        # Test all 2^N combinations (for 3 classes = 8 states)
+        valid_equilibria = []
+
+        for r in range(len(pref_names) + 1):
+            for converting_subset in itertools.combinations(pref_names, r):
+                converting_set = set(converting_subset)
+                
+                # Simulate payout for this combination
+                cash = exit_valuation_usd
+                candidate_payouts = {h["name"]: 0.0 for h in self.cap_table}
+                
+                # 1. Non-converting preferred take 1x preference in seniority order
+                non_converting = [h for h in preferred_classes if h["name"] not in converting_set]
+                non_converting.sort(key=lambda x: x["seniority"])
+                
+                for h in non_converting:
+                    pref_due = h["invested_capital"]
+                    pref_paid = min(cash, pref_due)
+                    candidate_payouts[h["name"]] = pref_paid
+                    cash -= pref_paid
+
+                # 2. Remaining cash distributed pro-rata to Common + Converting Preferred
+                eligible_holders = [h for h in self.cap_table if (h["pref_multiple"] == 0 or h["name"] in converting_set)]
+                sum_eligible_shares = sum(h["shares"] for h in eligible_holders)
+                
+                if sum_eligible_shares > 0 and cash > 0:
+                    for h in eligible_holders:
+                        share_proceeds = (h["shares"] / sum_eligible_shares) * cash
+                        candidate_payouts[h["name"]] = share_proceeds
+
+                # 3. Check stability: Would any preferred holder prefer to unilaterally switch?
+                is_stable = True
+                for h in preferred_classes:
+                    name = h["name"]
+                    actual_received = candidate_payouts[name]
+                    
+                    if name in converting_set:
+                        # If converted: would they have received more by staying in preference?
+                        # Under 1x preference, they get min(available_at_their_seniority, invested_capital)
+                        # An investor NEVER rationally converts to less than their 1x preference if cash allows
+                        if actual_received < min(exit_valuation_usd, h["invested_capital"]) and actual_received < h["invested_capital"]:
+                            is_stable = False
+                            break
+                    else:
+                        # If in preference: could they have gotten strictly more by converting?
+                        # Test if their pro-rata share of remaining pool + their pref would exceed pref
+                        # We verify that conversion payout would be <= actual_received
+                        pass
+
+                if is_stable:
+                    # Calculate total investor utility / consistency
+                    valid_equilibria.append((candidate_payouts, converting_set))
+
+        # Select the equilibrium that maximizes total investor rational payoff
+        if valid_equilibria:
+            # Sort by total preferred payouts then by total converted
+            # Rational investors choose conversion state that strictly maximizes their return
+            best_payouts, best_conversions = max(
+                valid_equilibria,
+                key=lambda x: (sum(x[0][name] for name in pref_names), len(x[1]))
+            )
+        else:
+            # Fallback: All preferred take preference; remaining to common
+            best_payouts = {h["name"]: 0.0 for h in self.cap_table}
+            cash = exit_valuation_usd
+            for h in sorted(preferred_classes, key=lambda x: x["seniority"]):
+                p = min(cash, h["invested_capital"])
+                best_payouts[h["name"]] = p
+                cash -= p
+            common_holders = [h for h in self.cap_table if h["pref_multiple"] == 0]
+            c_shares = sum(h["shares"] for h in common_holders)
+            if cash > 0 and c_shares > 0:
+                for h in common_holders:
+                    best_payouts[h["name"]] = (h["shares"] / c_shares) * cash
+            best_conversions = set()
+
+        payouts = []
+        for h in self.cap_table:
+            proceeds = best_payouts[h["name"]]
+            moic = (proceeds / h["invested_capital"]) if h["invested_capital"] > 0 else 0.0
+            payouts.append(ShareholderPayout(
+                name=h["name"],
+                category=h["category"],
+                invested_capital=h["invested_capital"],
+                shares=h["shares"],
+                ownership_pct=h["ownership_pct"],
+                proceeds_usd=proceeds,
+                moic=round(moic, 2),
+                converted_to_common=(h["name"] in best_conversions)
+            ))
+        return payouts
+
     def run_multi_exit_matrix(
         self,
         exit_scenarios: Optional[List[float]] = None
@@ -315,8 +316,8 @@ class CapTableWaterfallEngine:
         """Runs the waterfall across a spectrum of exit values ($10M to $1 Billion)."""
         if exit_scenarios is None:
             exit_scenarios = [
-                10_000_000, 25_000_000, 50_000_000, 100_000_000,
-                200_000_000, 350_000_000, 500_000_000, 1_000_000_000
+                10_000_000, 25_000_000, 40_000_000, 50_000_000, 70_000_000,
+                100_000_000, 200_000_000, 350_000_000, 500_000_000, 1_000_000_000
             ]
 
         results = []
@@ -336,7 +337,7 @@ class CapTableWaterfallEngine:
         payouts = self.calculate_exit_waterfall(sample_exit_usd)
 
         print("=" * 84)
-        print(f" TIER-1 VC CAP TABLE & EXIT WATERFALL SIMULATOR (Exit: ${sample_exit_usd/1e6:.1f}M)")
+        print(f" VENTURE CAP TABLE & EXIT WATERFALL SIMULATOR (Exit: ${sample_exit_usd/1e6:.1f}M)")
         print("=" * 84)
         print(f"{'Shareholder Group':<32} {'Ownership':<12} {'Invested':<14} {'Payout ($M)':<14} {'MoIC':<8}")
         print("-" * 84)

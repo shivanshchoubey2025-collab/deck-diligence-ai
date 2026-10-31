@@ -1,82 +1,48 @@
-# VENTURE CAPITAL PRELIMINARY SCREENING MEMO
-
-**Target Company**: CogniFlow AI  
-**Sector / Industry**: Enterprise Software / Developer Tooling / GenAI Infrastructure  
-**Stage**: Series Seed | **Round Ask**: $2.50M at $18.00M Post-Money Valuation  
-**Diligence Health Score**: **80 / 100**  
-**Screener Verdict**: **[PRIORITY PARTNER CALL]**  
-**Executive Summary**: Fast-track to Investment Committee meeting. Clean unit economics, defensible technical moat, and disciplined burn.  
+# INVESTMENT COMMITTEE (IC) SCREENING MEMO
+**Company**: CogniFlow AI | **Stage**: Series Seed | **Sector**: Enterprise Software / Developer Tooling / GenAI Infrastructure  
+**Round Ask**: $2.5M on $18.0M Post-Money Valuation  
+**Date**: October 2026 | **Diligence Copilot**: DeckDiligence.ai  
 
 ---
 
-## 1. Company & Problem Overview
-* **Tagline**: Autonomous Multi-Agent Reliability & Enterprise QA Platform
-* **Problem**: Enterprise LLM agents fail in production >45% of the time due to non-deterministic loops, context window bloat, and uncontrolled third-party API hallucination.
-* **Proposed Solution**: A lightweight runtime observability SDK that intercepts agent tool calls in under 12ms, tracks execution trees, and automatically rolls back corrupted database state.
+### 1. EXECUTIVE VERDICT & SCORE
+* **Diligence Health Score**: **80 / 100**
+* **IC Recommendation**: **REQUEST UNIT ECONOMIC DATA ROOM**
+* **Audit Summary**: 1 Red Flags | 0 Cautions | 5 Positive Signals
 
 ---
 
-## 2. Core Unit Economics & Performance Metrics
+### 2. QUANTITATIVE UNIT ECONOMICS BENCHMARKING
 
-| Metric | Startup Claim | VC Industry Benchmark | Diligence Status |
-| :--- | :---: | :---: | :---: |
-| **Annual Recurring Revenue (ARR)** | $1,020,000 | N/A | Current Scale |
-| **LTV : CAC Ratio** | 25.28x | > 3.0x | Elite |
-| **CAC Payback Period** | 4.4 Months | < 12.0 Months | Top-Decile |
-| **Burn Multiple (Net Burn / Net New ARR)** | 0.95x | < 1.2x | Capital Disciplined |
-| **Claimed TAM vs. Bottom-Up Reality** | $95.0B | Bottom-up: $1728.0M | Exaggerated TAM |
-| **Valuation Multiple (Post-Money / ARR)** | 17.6x ARR | 15.0x - 25.0x ARR | Disciplined |
-
----
-
-## 3. The "Bullshit Detector" & Heuristic Audit Findings
-
-### 1. 🚨 **RED FLAG**: Severe TAM Disconnect (Fantasy Top-down TAM)
-* **Category**: Market Sizing (TAM)
-* **Specific Finding**: Deck claims a $95.0B TAM, but realistic bottom-up sizing (120,000 target accounts @ $14,400/yr) yields only $1728.0M.
-* **VC Standard Benchmark**: Claimed TAM should not exceed 3x-5x of realistic addressable customer accounts multiplied by annual contract value (ACV).
-* **Investment Impact**: High risk of market size exaggeration or TAM hallucination to justify unjustifiable seed valuations.
-
-### 2. 🟢 **POSITIVE SIGNAL**: Defensible Software Gross Margin with SLM Layer
-* **Category**: Unit Economics (Gross Margin)
-* **Specific Finding**: Healthy 91.0% gross margin supported by local/fine-tuned inference arbitration to suppress third-party API costs.
-* **VC Standard Benchmark**: Top-quartile enterprise software maintains >80% gross margin.
-* **Investment Impact**: Protects unit economics as enterprise customer token usage scales.
-
-### 3. 🟢 **POSITIVE SIGNAL**: Elite Capital-Efficient Sales Payback
-* **Category**: Sales Efficiency (CAC Payback)
-* **Specific Finding**: CAC payback is only 4.4 months, generating fast cash flow recycling into growth.
-* **VC Standard Benchmark**: Best-in-class venture benchmark: < 12 months.
-* **Investment Impact**: Allows startup to grow without burning excessive venture capital on marketing.
-
-### 4. 🟢 **POSITIVE SIGNAL**: Elite Capital Efficiency (< 1.0x Burn Multiple)
-* **Category**: Capital Efficiency (Burn Multiple)
-* **Specific Finding**: Burn Multiple is 0.95x (Burning only $0.95 for every $1.00 of net new ARR created).
-* **VC Standard Benchmark**: < 1.0x is elite top-decile efficiency.
-* **Investment Impact**: Exceptional founder capital allocation discipline.
-
-### 5. 🟢 **POSITIVE SIGNAL**: Attractive & Disciplined Entry Multiple
-* **Category**: Deal Terms & Valuation
-* **Specific Finding**: Reasonable 17.6x Post-Money/ARR multiple offers strong downside protection and headroom for fund return upside.
-* **VC Standard Benchmark**: Market standard: 15x - 22x ARR.
-* **Investment Impact**: Maximizes fund-level Multiple on Invested Capital (MoIC).
-
-### 6. 🟢 **POSITIVE SIGNAL**: Strong Technical Founder Pedigree
-* **Category**: Team & Defensibility Moat
-* **Specific Finding**: Founding team possesses native engineering leadership, patents, and prior hyperscaler/scaleup systems experience.
-* **VC Standard Benchmark**: Founder-market fit is the primary predictor of early-stage software outperformance.
-* **Investment Impact**: High velocity execution and ability to recruit top-tier engineering talent.
+| Metric | Startup Claim | Institutional Benchmark | Status |
+| :--- | :--- | :--- | :--- |
+| **ARR / Revenue** | $1.02M | > $1.0M for Series A | 🟢 Disclosed |
+| **Gross Margin** | 91.0% | >= 75% for Enterprise Software | 🟢 Pass |
+| **CAC Payback** | 4.4 mo | < 12 Months | 🟢 Elite |
+| **Burn Multiple** | 0.95x | < 1.0x Elite / 1.0x-2.0x Good | 🟢 Capital Efficient |
+| **Runway** | 11.5 mo | 18 - 24 Months Recommended | ⚠️ Short |
 
 ---
 
-## 4. Founding Team Evaluation
-- **Aarav Sharma (CEO & Co-Founder)**: Ex-Staff Engineer at Postman; B.Tech CSE (IIT Bombay); 2 US patents in distributed tracing.
-- **Neha Verma (CTO & Co-Founder)**: Ex-Machine Learning Lead at BrowserStack; M.S. Computer Science (Stanford).
+### 3. KEY HEURISTIC AUDIT FINDINGS
+
+#### 🚨 Critical Red Flags & Data Gaps
+* **Market Sizing (TAM) (Severe TAM Disconnect (> 10x Disparity))**: Deck claims a $95.0B TAM, but bottom-up sizing (120,000 accounts @ $14,400/yr) yields only $1728.0M.
+  * *VC Risk*: High risk of market size inflation to justify inflated seed/Series A valuations.
+
+#### ⚠️ Cautionary Observations
+* *No secondary cautions identified.*
+
+#### 🟢 Validated Strengths & Positive Signals
+* **Unit Economics (Gross Margin)**: Reported gross margin is 91.0%, meeting standard software margin hurdles.
+* **Sales Efficiency (CAC Payback)**: CAC payback is 4.4 months, allowing rapid cash reinvestment into go-to-market.
+* **Capital Efficiency (Burn Multiple)**: Burn Multiple is 0.95x (Top-decile capital discipline).
+* **Valuation Discipline**: Round pricing is grounded in current revenue run-rate ($1.02M ARR on $18.0M post).
+* **Team Composition**: Founding team has verified engineering / systems leadership.
 
 ---
 
-## 5. Recommendation for Investment Committee
-**Action**: **PRIORITY PARTNER CALL**  
-Fast-track to Investment Committee meeting. Clean unit economics, defensible technical moat, and disciplined burn.  
-
-*Generated by DeckDiligence.ai — Automated VC Due Diligence & Screening Engine.*
+### 4. POWER LAW FUND-RETURN ANALYSIS
+For a **$100M early-stage venture fund**, returning 3x the fund ($300M DPI) with standard 20% subsequent dilution requires:
+* An exit valuation of **>= $450M** if holding a 10% ownership stake at exit.
+* Current entry post-money ($18.0M) requires a **25.0x exit multiple** to return a meaningful fraction of the fund.
