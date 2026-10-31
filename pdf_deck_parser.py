@@ -173,12 +173,12 @@ class PDFPitchDeckParser:
                 clean_cac *= 1e3
             cac = clean_cac
 
-        # 6. Search for TAM
-        tam_match = re.search(r'[\$]?([0-9,]+(?:\.[0-9]+)?)\s*(B|b|Billion|T|t|Trillion|M|m|Million)?\s*(?:TAM|Total Addressable Market)', text, re.IGNORECASE)
+        # 6. Search for TAM (e.g. "$95B TAM", "$95B Global TAM", "TAM: $95 Billion")
+        tam_match = re.search(r'[\$]?([0-9,]+(?:\.[0-9]+)?)\s*(B|b|Billion|T|t|Trillion|M|m|Million)?\s*(?:Global\s*)?(?:TAM|Total Addressable Market)', text, re.IGNORECASE)
         if tam_match:
             tam = parse_amount(tam_match.group(1), tam_match.group(2))
         else:
-            tam_alt = re.search(r'(?:TAM|Total Addressable Market)\s*:?\s*[\$]?([0-9,]+(?:\.[0-9]+)?)\s*(B|b|Billion|T|t|Trillion)?', text, re.IGNORECASE)
+            tam_alt = re.search(r'(?:TAM|Total Addressable Market)[^\$\n]{0,40}[\$]?([0-9,]+(?:\.[0-9]+)?)\s*(B|b|Billion|T|t|Trillion)?', text, re.IGNORECASE)
             if tam_alt:
                 tam = parse_amount(tam_alt.group(1), tam_alt.group(2))
 

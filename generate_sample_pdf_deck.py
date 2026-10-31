@@ -1,142 +1,480 @@
 """
-Generates an institutional 11-slide PDF pitch deck for CogniFlow AI
-using reportlab to serve as an instant test file for PDF ingestion.
+========================================================================================
+VENTURE CAPITALIST FRIENDLY PITCH DECK GENERATOR
+----------------------------------------------------------------------------------------
+Generates an executive, dark-mode, high-contrast 16:9 landscape PDF pitch deck
+styled after tier-1 Silicon Valley & Bengaluru tech decks (Linear, Stripe, Vercel).
+Includes visual KPI metric tiles, competitor 2x2 grids, and architectural callouts.
+========================================================================================
 """
 
 import os
 from reportlab.lib.pagesizes import letter, landscape
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+)
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
 
-def build_sample_pdf(output_path: str):
+# Dark Modern Theme Colors
+BG_COLOR = colors.HexColor("#0A0E1A")        # Deep Dark Canvas
+CARD_BG = colors.HexColor("#141C2E")         # Elevated Container
+CARD_BORDER = colors.HexColor("#2A3756")     # Border stroke
+CYAN_ACCENT = colors.HexColor("#38BDF8")     # Primary Accent
+EMERALD_GREEN = colors.HexColor("#10B981")   # Metrics / Traction Accent
+ROSE_RED = colors.HexColor("#F43F5E")        # Problem Accent
+AMBER_YELLOW = colors.HexColor("#FBBF24")    # Milestone Accent
+TEXT_WHITE = colors.HexColor("#FFFFFF")      # Main Headers
+TEXT_SLATE = colors.HexColor("#94A3B8")      # Subtext / Captions
+TEXT_LIGHT = colors.HexColor("#E2E8F0")      # Body text
+
+
+def draw_slide_background(canvas, doc):
+    """Draws sleek dark canvas background, header brand pill, and footer on every page."""
+    canvas.saveState()
+    width, height = doc.pagesize  # 792 x 612 points
+
+    # 1. Fill Dark Background
+    canvas.setFillColor(BG_COLOR)
+    canvas.rect(0, 0, width, height, fill=1, stroke=0)
+
+    # 2. Top Accent Line (Cyan Gradient Simulation)
+    canvas.setFillColor(CYAN_ACCENT)
+    canvas.rect(0, height - 4, width, 4, fill=1, stroke=0)
+
+    # 3. Header Watermark / Confidentiality Tag
+    canvas.setFont("Helvetica-Bold", 8)
+    canvas.setFillColor(TEXT_SLATE)
+    canvas.drawString(40, height - 26, "COGNIFLOW AI // CONFIDENTIAL INVESTOR PRESENTATION // SERIES SEED")
+
+    # 4. Footer Slide Number & Brand
+    canvas.drawString(40, 20, "STRICTLY PRIVATE & CONFIDENTIAL")
+    page_num = doc.page
+    canvas.drawRightString(width - 40, 20, f"SLIDE {page_num:02d} OF 11")
+
+    canvas.restoreState()
+
+
+def build_vc_friendly_pdf(output_path: str):
     doc = SimpleDocTemplate(
         output_path,
         pagesize=landscape(letter),
-        leftMargin=36,
-        rightMargin=36,
-        topMargin=36,
+        leftMargin=40,
+        rightMargin=40,
+        topMargin=42,
         bottomMargin=36
     )
 
     styles = getSampleStyleSheet()
-    
+
+    # Typography Hierarchy
+    cat_style = ParagraphStyle(
+        'CategoryTag',
+        fontName='Helvetica-Bold',
+        fontSize=10,
+        leading=13,
+        textColor=CYAN_ACCENT,
+        spaceAfter=4
+    )
+
     title_style = ParagraphStyle(
-        'SlideTitle',
-        parent=styles['Heading1'],
-        fontSize=26,
-        leading=32,
-        textColor=colors.HexColor('#1a365d'),
-        spaceAfter=15
+        'DeckTitle',
+        fontName='Helvetica-Bold',
+        fontSize=24,
+        leading=28,
+        textColor=TEXT_WHITE,
+        spaceAfter=14
     )
-    
-    sub_style = ParagraphStyle(
-        'SlideSubtitle',
-        parent=styles['Normal'],
-        fontSize=15,
-        leading=20,
-        textColor=colors.HexColor('#2b6cb0'),
-        spaceAfter=20
-    )
-    
-    body_style = ParagraphStyle(
-        'SlideBody',
-        parent=styles['Normal'],
-        fontSize=13,
-        leading=18,
-        textColor=colors.HexColor('#2d3748'),
+
+    lead_style = ParagraphStyle(
+        'DeckLead',
+        fontName='Helvetica',
+        fontSize=12,
+        leading=16,
+        textColor=TEXT_LIGHT,
         spaceAfter=12
+    )
+
+    card_label_style = ParagraphStyle(
+        'CardLabel',
+        fontName='Helvetica-Bold',
+        fontSize=8,
+        leading=10,
+        textColor=TEXT_SLATE,
+        spaceAfter=3
+    )
+
+    card_metric_style = ParagraphStyle(
+        'CardMetric',
+        fontName='Helvetica-Bold',
+        fontSize=18,
+        leading=22,
+        textColor=EMERALD_GREEN,
+        spaceAfter=2
+    )
+
+    card_body_style = ParagraphStyle(
+        'CardBody',
+        fontName='Helvetica',
+        fontSize=9,
+        leading=12,
+        textColor=TEXT_LIGHT
+    )
+
+    problem_body_style = ParagraphStyle(
+        'ProblemBody',
+        fontName='Helvetica',
+        fontSize=9.5,
+        leading=13,
+        textColor=TEXT_LIGHT
     )
 
     story = []
 
-    slides_content = [
-        # Slide 1
-        ("CogniFlow AI", "Autonomous Multi-Agent Reliability & Enterprise QA Platform", [
-            "Category: Enterprise Software & GenAI Infrastructure",
-            "Round: Series Seed | Raising $2.5M at $18.0M Post-Money Valuation",
-            "Founders: Aarav Sharma (Ex-Postman) & Neha Verma (Stanford MS CS)"
-        ]),
-        # Slide 2
-        ("The Hair-On-Fire Problem", "Enterprises Are Bleeding Money on Failed Production Agents", [
-            "Critical Pain Point: Enterprise LLM agents fail in production >45% of the time.",
-            "Database Corruption: Non-deterministic agent hallucinated SQL writes corrupt production state.",
-            "Wasted Capital: Fortune 500 enterprises burn over $300K/quarter on redundant token inference loops."
-        ]),
-        # Slide 3
-        ("The 10x Mechanism", "Active Kernel-Level Interception with Zero-Downtime State Rollback", [
-            "Our Solution: A lightweight runtime observability SDK that intercepts agent tool calls in under 12ms.",
-            "Tracks distributed execution trees and automatically rolls back corrupted database state.",
-            "Zero Downtime: Eliminates 6 hours of average engineer manual rollback downtime per incident."
-        ]),
-        # Slide 4
-        ("Why Now?", "The Macro Inflection Point in Multi-Agent Reasoning", [
-            "1. Reasoning Models (o1/Sonnet/Gemini) just made autonomous multi-step agents viable in 2026.",
-            "2. Enterprise GenAI spending is shifting from prompt toys to compliance, reliability, and infrastructure.",
-            "3. eBPF kernel tracing maturity in Kubernetes enables near-zero latency traffic inspection."
-        ]),
-        # Slide 5
-        ("Market Sizing (Bottom-Up Math)", "From a $2.1B Beachhead to a $95.0B Global TAM", [
-            "Claimed TAM: $95.0B Global Enterprise Observability & AI Governance Software.",
-            "Serviceable Obtainable Market (SOM): $2.16B (120,000 mid-to-large dev teams @ $18,000 ACV).",
-            "Bottom-up math grounded in developer team volume and enterprise software pricing power."
-        ]),
-        # Slide 6
-        ("Technical Moat & Defensibility", "Why Foundation Models Cannot Replicate Our Infrastructure", [
-            "Kernel-Level eBPF Probes: Runs inside customer VPCs with zero latency overhead.",
-            "Proprietary Local SLM Arbiter: Fine-tuned 3B local model replaces external API calls, cutting COGS by 76%.",
-            "Runtime Lock-In: Deeply embedded in CI/CD pipeline test gates with high enterprise switching costs."
-        ]),
-        # Slide 7
-        ("Compounding Traction & Economics", "Demonstrated Capital-Efficient Software Scale", [
-            "Financial Traction: $1,020,000 ARR ($85,000 MRR) growing at 5.7x YoY.",
-            "Sales Efficiency: CAC is $4,800 with an elite 4.4 Months CAC Payback Period.",
-            "Unit Economics: Inferred LTV:CAC of 25.28x with 91.0% Gross Margin and 0.9% monthly churn.",
-            "Capital Discipline: Burn Multiple is 0.95x with 11.5 Months of Cash Runway ($750K in bank)."
-        ]),
-        # Slide 8
-        ("Go-To-Market Flywheel", "Product-Led Developer Land & Enterprise Expand", [
-            "1. Land: Free open-source Python/TypeScript agent SDK drives bottom-up adoption by engineering teams.",
-            "2. Expand: Usage-based pricing tiers charging per 100K monitored agent executions.",
-            "3. Lock: Enterprise air-gapped VPC deployments with SOC2 Type II, RBAC, and PII redaction."
-        ]),
-        # Slide 9
-        ("Competitor Landscape (2x2)", "Positioned at Active State Protection with Low Inference COGS", [
-            "Y-Axis: Active Runtime Rollback vs. Passive Log Ingestion.",
-            "X-Axis: Lightweight Local SLM vs. Expensive Third-Party API Bills.",
-            "Legacy APMs (Datadog/Dynatrace): High cost, passive logging only.",
-            "OpenAI API Wrappers: High latency, 90% gross margin illusion, zero enterprise data privacy."
-        ]),
-        # Slide 10
-        ("Founding Team & Earned Secrets", "Systems Architects with Proven Execution Pedigree", [
-            "Aarav Sharma (CEO & Co-Founder): Ex-Staff Engineer at Postman. 2 US patents in distributed tracing.",
-            "Neha Verma (CTO & Co-Founder): Ex-Machine Learning Lead at BrowserStack. M.S. CS from Stanford University.",
-            "Advisors: Former VP of Infrastructure at Datadog and Lead Architect at HashiCorp."
-        ]),
-        # Slide 11
-        ("The Ask & 18-Month Milestones", "Raising $2.5M Series Seed to Compound to $3.5M ARR", [
-            "Round Structure: Raising $2,500,000 Series Seed for 24 months of runway.",
-            "Use of Funds: 70% Core Engineering (eBPF & distributed systems), 20% DevRel GTM, 10% GPU Cluster.",
-            "Series A Milestones: Scale from $1.02M ARR to $3.5M ARR with 150+ Enterprise Accounts."
-        ])
+    # =========================================================================
+    # SLIDE 1: THE CATEGORY HOOK
+    # =========================================================================
+    story.append(Paragraph("SLIDE 01 // CATEGORY HOOK", cat_style))
+    story.append(Paragraph("CogniFlow AI", title_style))
+    story.append(Paragraph("Autonomous Multi-Agent Reliability & Enterprise QA Platform", ParagraphStyle('Hook', fontName='Helvetica-Bold', fontSize=16, leading=20, textColor=CYAN_ACCENT, spaceAfter=20)))
+    
+    s1_data = [
+        [
+            Paragraph("<b>Target Category</b><br/><font color='#e2e8f0'>Enterprise Software / GenAI Infrastructure</font>", card_body_style),
+            Paragraph("<b>Current Round</b><br/><font color='#10b981'><b>Raising $2.5M Series Seed</b></font>", card_body_style),
+            Paragraph("<b>Post-Money Valuation</b><br/><font color='#e2e8f0'>$18.0M Post-Money Cap</font>", card_body_style),
+            Paragraph("<b>Headquarters</b><br/><font color='#e2e8f0'>Bengaluru & San Francisco</font>", card_body_style)
+        ]
     ]
+    s1_table = Table(s1_data, colWidths=[175, 175, 175, 175])
+    s1_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1, CARD_BORDER),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 14),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+        ('LEFTPADDING', (0,0), (-1,-1), 12),
+        ('RIGHTPADDING', (0,0), (-1,-1), 12),
+    ]))
+    story.append(s1_table)
+    story.append(Spacer(1, 25))
+    story.append(Paragraph("<b>The One-Liner</b>: CogniFlow intercepts non-deterministic agent tool calls at the Linux kernel level in under 12ms, eliminating database corruption and automated hallucination cascades for Fortune 500 engineering teams.", lead_style))
+    story.append(PageBreak())
 
-    for i, (title, subtitle, bullets) in enumerate(slides_content, 1):
-        story.append(Paragraph(f"SLIDE {i:02d} // {title.upper()}", sub_style))
-        story.append(Paragraph(title, title_style))
-        story.append(Paragraph(subtitle, sub_style))
-        story.append(Spacer(1, 15))
-        for b in bullets:
-            story.append(Paragraph(f"&bull; {b}", body_style))
-        if i < len(slides_content):
-            story.append(PageBreak())
+    # =========================================================================
+    # SLIDE 2: THE BLEEDING NECK (PROBLEM)
+    # =========================================================================
+    story.append(Paragraph("SLIDE 02 // THE HAIR-ON-FIRE PROBLEM", cat_style))
+    story.append(Paragraph("Enterprises Are Bleeding Money on Broken Agent Loops", title_style))
+    story.append(Paragraph("Critical Pain Point: Multi-agent workflows are failing in production due to 3 catastrophic vulnerabilities:", lead_style))
 
-    doc.build(story)
-    print(f"[+] Sample pitch deck PDF generated successfully at: {output_path}")
+    p_data = [
+        [
+            Paragraph("<font color='#f43f5e'><b>45% EXECUTION FAILURE RATE</b></font><br/><br/>Multi-agent loops get trapped in circular reasoning calls, causing enterprise web workers to hang indefinitely.", problem_body_style),
+            Paragraph("<font color='#f43f5e'><b>DATABASE CORRUPTION</b></font><br/><br/>Hallucinated SQL and API writes corrupt production customer data, requiring an average of 6 hours of dev rollback downtime.", problem_body_style),
+            Paragraph("<font color='#f43f5e'><b>$300K+ WASTED TOKENS / QTR</b></font><br/><br/>Uncontrolled recursive LLM tool calls burn enterprise cloud budgets on redundant API pass-through calls.", problem_body_style)
+        ]
+    ]
+    p_table = Table(p_data, colWidths=[233, 233, 234])
+    p_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1.5, colors.HexColor("#7F1D1D")),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 16),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 16),
+        ('LEFTPADDING', (0,0), (-1,-1), 12),
+        ('RIGHTPADDING', (0,0), (-1,-1), 12),
+    ]))
+    story.append(p_table)
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 3: THE 10X MECHANISM (SOLUTION)
+    # =========================================================================
+    story.append(Paragraph("SLIDE 03 // THE 10x MECHANISM", cat_style))
+    story.append(Paragraph("Active Runtime Interception & Zero-Downtime State Rollback", title_style))
+    
+    sol_data = [
+        [
+            Paragraph("<font color='#f43f5e'><b>WITHOUT COGNIFLOW (THE STATUS QUO)</b></font><br/><br/>"
+                      "&bull; Agent initiates uncontrolled SQL / API mutation<br/>"
+                      "&bull; Database corrupts user account balances or records<br/>"
+                      "&bull; Incident triggers on PagerDuty 4 hours later<br/>"
+                      "&bull; Engineering team manually runs database restores<br/>"
+                      "&bull; <b>Average Loss: $65,000 per incident</b>", card_body_style),
+            Paragraph("<font color='#10b981'><b>WITH COGNIFLOW (THE 10X MECHANISM)</b></font><br/><br/>"
+                      "&bull; <b>Kernel-Level eBPF Probe intercepts tool call in &lt;12ms</b><br/>"
+                      "&bull; Local SLM Arbiter checks execution tree determinism<br/>"
+                      "&bull; Hallucinated state change is isolated & rolled back instantly<br/>"
+                      "&bull; Zero customer impact; full telemetry trace logged in CI/CD<br/>"
+                      "&bull; <b>Zero downtime & 100% compliance SLA</b>", card_body_style)
+        ]
+    ]
+    sol_table = Table(sol_data, colWidths=[350, 350])
+    sol_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (0,0), colors.HexColor("#191321")),
+        ('BACKGROUND', (1,0), (1,0), colors.HexColor("#0f2420")),
+        ('BOX', (0,0), (0,0), 1, colors.HexColor("#7F1D1D")),
+        ('BOX', (1,0), (1,0), 1.5, EMERALD_GREEN),
+        ('TOPPADDING', (0,0), (-1,-1), 14),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+        ('LEFTPADDING', (0,0), (-1,-1), 14),
+        ('RIGHTPADDING', (0,0), (-1,-1), 14),
+    ]))
+    story.append(sol_table)
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 4: WHY NOW?
+    # =========================================================================
+    story.append(Paragraph("SLIDE 04 // MACRO INFLECTION POINT", cat_style))
+    story.append(Paragraph("Why This Couldn't Exist 3 Years Ago", title_style))
+    story.append(Paragraph("Three structural tailwinds make 2026-2027 the exact window to capture this market:", lead_style))
+
+    why_data = [
+        [
+            Paragraph("<font color='#38bdf8'><b>1. REASONING MODELS ARRIVED</b></font><br/><br/>Multi-step reasoning models (o1, Sonnet, Gemini) just made autonomous agentic loops viable in enterprise production.", card_body_style),
+            Paragraph("<font color='#38bdf8'><b>2. BUDGET INFLECTION POINT</b></font><br/><br/>Enterprise GenAI budgets have moved from 'exploratory prompt experiments' to 'production infrastructure & compliance SLAs'.", card_body_style),
+            Paragraph("<font color='#38bdf8'><b>3. eBPF KERNEL MATURITY</b></font><br/><br/>Linux kernel tracing probes now run inside enterprise Kubernetes clusters with near-zero latency overhead (&lt;12ms).", card_body_style)
+        ]
+    ]
+    why_table = Table(why_data, colWidths=[233, 233, 234])
+    why_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1, CARD_BORDER),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 16),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 16),
+        ('LEFTPADDING', (0,0), (-1,-1), 12),
+        ('RIGHTPADDING', (0,0), (-1,-1), 12),
+    ]))
+    story.append(why_table)
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 5: MARKET SIZING (BOTTOM-UP MATH)
+    # =========================================================================
+    story.append(Paragraph("SLIDE 05 // BOTTOM-UP MARKET SIZING", cat_style))
+    story.append(Paragraph("A $2.1B Beachhead Expanding to a $95B Global TAM", title_style))
+
+    tam_data = [
+        [
+            Paragraph("<font color='#94a3b8'><b>SOM (BEACHHEAD MARKET)</b></font><br/><br/>"
+                      "<font size='18' color='#38bdf8'><b>$2.16 BILLION</b></font><br/><br/>"
+                      "120,000 Mid-to-Large Engineering Teams &times; $18,000 Initial ACV.<br/>"
+                      "Target: US/EU SaaS and Indian Global Capability Centers (GCCs).", card_body_style),
+            Paragraph("<font color='#94a3b8'><b>SAM (SERVICEABLE ADDRESSABLE)</b></font><br/><br/>"
+                      "<font size='18' color='#10b981'><b>$8.64 BILLION</b></font><br/><br/>"
+                      "Fortune 2000 Enterprises deploying multi-agent workflows across production databases with dedicated VPC air-gaps.", card_body_style),
+            Paragraph("<font color='#94a3b8'><b>TAM (TOTAL GLOBAL MARKET)</b></font><br/><br/>"
+                      "<font size='18' color='#ffffff'><b>$95.0 BILLION</b></font><br/><br/>"
+                      "Total Enterprise Observability, Automated QA, and AI Governance Software by 2030 (Gartner / IDC forecast).", card_body_style)
+        ]
+    ]
+    tam_table = Table(tam_data, colWidths=[233, 233, 234])
+    tam_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1, CARD_BORDER),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 16),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 16),
+        ('LEFTPADDING', (0,0), (-1,-1), 12),
+        ('RIGHTPADDING', (0,0), (-1,-1), 12),
+    ]))
+    story.append(tam_table)
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 6: TECHNICAL MOAT & SECRET SAUCE
+    # =========================================================================
+    story.append(Paragraph("SLIDE 06 // TECHNICAL DEFENSIBILITY", cat_style))
+    story.append(Paragraph("Why Foundation Models & Wrappers Can't Copy Us", title_style))
+
+    moat_data = [
+        [
+            Paragraph("<font color='#38bdf8'><b>1. KERNEL-LEVEL eBPF PROBES</b></font><br/><br/>"
+                      "Unlike Python wrapper tools (LangSmith, basic logging), our interceptor runs as an eBPF probe at the Linux OS layer inside customer VPCs. Zero network latency overhead.", card_body_style),
+            Paragraph("<font color='#38bdf8'><b>2. LOCAL SLM ARBITER</b></font><br/><br/>"
+                      "Replaced expensive $30K/mo OpenAI evaluation bills with fine-tuned 3B parameter local models running on customer hardware, <b>slashing token COGS by 76%</b>.", card_body_style),
+            Paragraph("<font color='#38bdf8'><b>3. RUNTIME CI/CD LOCK-IN</b></font><br/><br/>"
+                      "Embedded directly into developer testing pipelines and deployment gates. Ripping out CogniFlow creates immediate enterprise compliance vulnerabilities.", card_body_style)
+        ]
+    ]
+    moat_table = Table(moat_data, colWidths=[233, 233, 234])
+    moat_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1, CARD_BORDER),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 16),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 16),
+        ('LEFTPADDING', (0,0), (-1,-1), 12),
+        ('RIGHTPADDING', (0,0), (-1,-1), 12),
+    ]))
+    story.append(moat_table)
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 7: TRACTION & COMPOUNDING UNIT ECONOMICS
+    # =========================================================================
+    story.append(Paragraph("SLIDE 07 // TRACTION & COMPOUNDING ECONOMICS", cat_style))
+    story.append(Paragraph("Demonstrated Capital-Efficient Software Scale", title_style))
+
+    metrics_tiles = [
+        [
+            Paragraph("<font color='#94a3b8'>ANNUAL RECURRING REVENUE</font><br/><font size='20' color='#10b981'><b>$1,020,000 ARR</b></font><br/><font size='8' color='#94a3b8'>$85,000 MRR | 5.7x YoY Growth</font>", card_body_style),
+            Paragraph("<font color='#94a3b8'>LTV : CAC RATIO</font><br/><font size='20' color='#38bdf8'><b>25.3x</b></font><br/><font size='8' color='#94a3b8'>Benchmark: > 3.0x (Elite)</font>", card_body_style),
+            Paragraph("<font color='#94a3b8'>CAC PAYBACK PERIOD</font><br/><font size='20' color='#fbbf24'><b>4.4 MONTHS</b></font><br/><font size='8' color='#94a3b8'>Fast cash flow recycling</font>", card_body_style),
+            Paragraph("<font color='#94a3b8'>BURN MULTIPLE</font><br/><font size='20' color='#10b981'><b>0.95x</b></font><br/><font size='8' color='#94a3b8'>David Sacks Metric: &lt; 1.0x</font>", card_body_style),
+        ]
+    ]
+    m_table = Table(metrics_tiles, colWidths=[175, 175, 175, 175])
+    m_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1.5, EMERALD_GREEN),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 14),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+        ('LEFTPADDING', (0,0), (-1,-1), 10),
+        ('RIGHTPADDING', (0,0), (-1,-1), 10),
+    ]))
+    story.append(m_table)
+    story.append(Spacer(1, 20))
+    story.append(Paragraph("<b>Customer Health</b>: 91.0% Software Gross Margins, 0.9% Monthly Logo Churn, and 11.5 Months of existing cash runway ($750K in bank).", lead_style))
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 8: GO-TO-MARKET FLYWHEEL
+    # =========================================================================
+    story.append(Paragraph("SLIDE 08 // GO-TO-MARKET FLYWHEEL", cat_style))
+    story.append(Paragraph("Developer Land & Enterprise Expand Engine", title_style))
+
+    gtm_data = [
+        [
+            Paragraph("<font color='#38bdf8'><b>PHASE 1: LAND (PLG)</b></font><br/><br/>Free open-source Python and TypeScript agent SDK drives grassroots adoption among developers on GitHub.", card_body_style),
+            Paragraph("<font color='#10b981'><b>PHASE 2: EXPAND (USAGE)</b></font><br/><br/>Automated transition to usage-based pricing ($0.05 per 100K monitored agent executions) as applications enter production.", card_body_style),
+            Paragraph("<font color='#ffffff'><b>PHASE 3: LOCK (ENTERPRISE)</b></font><br/><br/>Annual Enterprise Contracts ($25K - $100K ACV) for air-gapped VPC deployments, SOC2 Type II, RBAC, and PII redaction.", card_body_style)
+        ]
+    ]
+    gtm_table = Table(gtm_data, colWidths=[233, 233, 234])
+    gtm_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1, CARD_BORDER),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 16),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 16),
+        ('LEFTPADDING', (0,0), (-1,-1), 12),
+        ('RIGHTPADDING', (0,0), (-1,-1), 12),
+    ]))
+    story.append(gtm_table)
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 9: COMPETITOR 2x2 MATRIX
+    # =========================================================================
+    story.append(Paragraph("SLIDE 09 // COMPETITIVE LANDSCAPE", cat_style))
+    story.append(Paragraph("Positioned at Active State Protection with Low Inference COGS", title_style))
+
+    comp_data = [
+        [
+            Paragraph("<b>COMPETITIVE QUADRANT</b>", card_label_style),
+            Paragraph("<b>HIGH INFERENCE COGS (API CALLS)</b>", card_label_style),
+            Paragraph("<b>LOW INFERENCE COGS (LOCAL SLM)</b>", card_label_style),
+        ],
+        [
+            Paragraph("<b>ACTIVE RUNTIME ROLLBACK</b>", card_label_style),
+            Paragraph("<font color='#f43f5e'><b>API Wrappers</b></font><br/>High latency, 90% margin illusion, breaks when OpenAI changes API.", card_body_style),
+            Paragraph("<font color='#10b981'><b>COGNIFLOW AI (LEADER)</b></font><br/>Kernel eBPF interception (&lt;12ms), zero-token-overhead SLM, active rollback.", card_body_style)
+        ],
+        [
+            Paragraph("<b>PASSIVE LOGGING ONLY</b>", card_label_style),
+            Paragraph("<font color='#f43f5e'><b>Legacy APMs (Datadog/Dynatrace)</b></font><br/>Very high cost, passive logs only; cannot rollback state.", card_body_style),
+            Paragraph("<font color='#94a3b8'><b>Open Source Logging (Prometheus)</b></font><br/>Raw metrics, zero agent understanding, manual debugging.", card_body_style)
+        ]
+    ]
+    comp_table = Table(comp_data, colWidths=[180, 260, 260])
+    comp_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BACKGROUND', (2,1), (2,1), colors.HexColor("#0f2922")),
+        ('BOX', (0,0), (-1,-1), 1, CARD_BORDER),
+        ('BOX', (2,1), (2,1), 1.5, EMERALD_GREEN),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 12),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 12),
+        ('LEFTPADDING', (0,0), (-1,-1), 10),
+        ('RIGHTPADDING', (0,0), (-1,-1), 10),
+    ]))
+    story.append(comp_table)
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 10: FOUNDING TEAM & EARNED SECRETS
+    # =========================================================================
+    story.append(Paragraph("SLIDE 10 // UNFAIR ADVANTAGE & TEAM", cat_style))
+    story.append(Paragraph("Systems Architects with Deep Execution Pedigree", title_style))
+
+    team_data = [
+        [
+            Paragraph("<font color='#38bdf8'><b>AARAV SHARMA</b></font> &mdash; <i>CEO & Co-Founder</i><br/><br/>"
+                      "&bull; <b>Ex-Staff Engineer @ Postman</b>: Built distributed tracing pipelines handling 25M developers.<br/>"
+                      "&bull; <b>Patents</b>: Holds 2 granted US patents in runtime execution interception.<br/>"
+                      "&bull; <b>Education</b>: B.Tech Computer Science (IIT Bombay).", card_body_style),
+            Paragraph("<font color='#38bdf8'><b>NEHA VERMA</b></font> &mdash; <i>CTO & Co-Founder</i><br/><br/>"
+                      "&bull; <b>Ex-ML Lead @ BrowserStack</b>: Architected distributed testing clusters running 100K jobs/hour.<br/>"
+                      "&bull; <b>Specialization</b>: Published researcher in small language model fine-tuning.<br/>"
+                      "&bull; <b>Education</b>: M.S. Computer Science (Stanford University).", card_body_style)
+        ]
+    ]
+    team_table = Table(team_data, colWidths=[350, 350])
+    team_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1, CARD_BORDER),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 14),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+        ('LEFTPADDING', (0,0), (-1,-1), 14),
+        ('RIGHTPADDING', (0,0), (-1,-1), 14),
+    ]))
+    story.append(team_table)
+    story.append(PageBreak())
+
+    # =========================================================================
+    # SLIDE 11: THE ASK & 18-MONTH MILESTONES
+    # =========================================================================
+    story.append(Paragraph("SLIDE 11 // THE ASK & MILESTONES", cat_style))
+    story.append(Paragraph("Raising $2,500,000 to Scale to $3.5M ARR", title_style))
+
+    ask_data = [
+        [
+            Paragraph("<font color='#94a3b8'>CAPITAL ALLOCATION (USE OF FUNDS)</font><br/><br/>"
+                      "&bull; <b>70% Core Distributed Systems Engineering</b>: Hiring senior eBPF kernel engineers in Bengaluru.<br/>"
+                      "&bull; <b>20% Developer Go-To-Market</b>: Technical DevRel, developer hackathons, and US enterprise sales.<br/>"
+                      "&bull; <b>10% Dedicated GPU Cluster</b>: Local SLM model fine-tuning and benchmark clusters.", card_body_style),
+            Paragraph("<font color='#10b981'><b>18-MONTH SERIES A MILESTONES</b></font><br/><br/>"
+                      "&bull; <b>ARR Target</b>: Scale from <b>$1.02M ARR to $3.5M ARR</b>.<br/>"
+                      "&bull; <b>Enterprise Logos</b>: Expand from 71 to <b>150+ Enterprise Accounts</b>.<br/>"
+                      "&bull; <b>Net Retention</b>: Maintain &gt;130% Net Dollar Retention (NDR).<br/>"
+                      "&bull; <b>Series A Ready</b>: Positioned for a $12M - $15M round at top-decile valuation.", card_body_style)
+        ]
+    ]
+    ask_table = Table(ask_data, colWidths=[350, 350])
+    ask_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), CARD_BG),
+        ('BOX', (0,0), (-1,-1), 1.5, AMBER_YELLOW),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, CARD_BORDER),
+        ('TOPPADDING', (0,0), (-1,-1), 14),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+        ('LEFTPADDING', (0,0), (-1,-1), 14),
+        ('RIGHTPADDING', (0,0), (-1,-1), 14),
+    ]))
+    story.append(ask_table)
+
+    # Build Document with custom onFirstPage and onLaterPages callback
+    doc.build(story, onFirstPage=draw_slide_background, onLaterPages=draw_slide_background)
+    print(f"[+] Venture Capitalist Friendly Pitch Deck compiled at: {output_path}")
 
 
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    out = os.path.join(base_dir, "Sample_Pitch_Deck_CogniFlow.pdf")
-    build_sample_pdf(out)
+    out_pdf = os.path.join(base_dir, "Sample_Pitch_Deck_CogniFlow.pdf")
+    build_vc_friendly_pdf(out_pdf)
