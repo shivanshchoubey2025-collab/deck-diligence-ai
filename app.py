@@ -13,6 +13,8 @@ Run via:
 import os
 import json
 import streamlit as st
+import pandas as pd
+import altair as alt
 from deck_screener import PitchDeckScreener, AuditFlag
 from pdf_deck_parser import PDFPitchDeckParser
 from tech_moat_scanner import (
@@ -22,6 +24,7 @@ from tech_moat_scanner import (
     HYPERBUZZ_REQUIREMENTS,
     HYPERBUZZ_CODE_SAMPLE
 )
+from cap_table_waterfall import CapTableWaterfallEngine
 
 st.set_page_config(
     page_title="DeckDiligence.ai | VC Pitch Deck Screener",
@@ -234,13 +237,14 @@ else:
     st.error(f"### 🚨 VERDICT: [{verdict}]\n**Action Plan**: {verdict_desc}")
 
 # -----------------------------------------------------------------------------
-# TABS: Diligence Findings, Metrics, 11-Slide Studio, Tech Moat, and IC Memo
+# TABS: Diligence Findings, Metrics, 11-Slide Studio, Tech Moat, Waterfall, Memo
 # -----------------------------------------------------------------------------
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🔍 Heuristic Bullshit Detector",
     "📊 Core Venture Metrics",
     "🎴 11-Slide Deck Studio",
     "🔬 Tech Moat Code Scanner",
+    "💰 Cap Table & Exit Waterfall",
     "📄 1-Page Investment Memo"
 ])
 
@@ -806,6 +810,245 @@ with tab4:
         st.code(reqs_text, language="text")
 
 with tab5:
+    st.subheader("💰 Tier-1 Cap Table Dilution & Liquidation Preference Waterfall")
+    st.markdown(
+        "Institutional exit proceeds modeler across multi-round financing tranches (Seed → Series A → Series B). "
+        "Evaluates **1x Non-Participating vs. Participating Preferred**, conversion crossover hurdles, and downside preference floors."
+    )
+
+    # 1. Configuration & Scenarios
+    col_w_top1, col_w_top2 = st.columns([1.5, 1.0])
+    with col_w_top1:
+        exit_val_m = st.slider(
+            "Hypothetical M&A / Exit Valuation ($ Millions):",
+            min_value=5.0,
+            max_value=1000.0,
+            value=100.0,
+            step=5.0,
+            help="Simulate the total cash proceeds returned at company sale or trade sale."
+        )
+    with col_w_top2:
+        pref_term = st.radio(
+            "Liquidation Preference Structure:",
+            options=[
+                "1x Non-Participating Preferred (NVCA / Tier-1 Market Standard)",
+                "1x Participating Preferred ('Double Dipping' - Off-Market)"
+            ],
+            index=0,
+            help="1x Non-Participating: Investor gets MAX(1x Capital, Pro-Rata Common). Participating: Investor gets 1x Capital PLUS Pro-Rata of remainder."
+        )
+    
+    is_participating = "Participating" in pref_term and "Non-Participating" not in pref_term
+
+    # Round parameters customization
+    with st.expander("⚙️ Customize Financing Rounds & Pre/Post-Money Valuations"):
+        rf_c1, rf_c2, rf_c3 = st.columns(3)
+        with rf_c1:
+            st.markdown("**Seed Round**")
+            seed_cap = st.number_input("Seed Capital ($M)", min_value=0.5, max_value=10.0, value=2.5, step=0.5) * 1e6
+            seed_post = st.number_input("Seed Post-Money ($M)", min_value=5.0, max_value=30.0, value=18.0, step=1.0) * 1e6
+        with rf_c2:
+            st.markdown("**Series A Round**")
+            sa_cap = st.number_input("Series A Capital ($M)", min_value=2.0, max_value=30.0, value=10.0, step=1.0) * 1e6
+            sa_post = st.number_input("Series A Post-Money ($M)", min_value=20.0, max_value=100.0, value=50.0, step=5.0) * 1e6
+        with rf_c3:
+            st.markdown("**Series B Round**")
+            sb_cap = st.number_input("Series B Capital ($M)", min_value=5.0, max_value=100.0, value=25.0, step=5.0) * 1e6
+            sb_post = st.number_input("Series B Post-Money ($M)", min_value=50.0, max_value=400.0, value=150.0, step=10.0) * 1e6
+
+    # Instantiate Engine
+    wf_engine = CapTableWaterfallEngine()
+    wf_engine.build_standard_venture_cap_table(
+        seed_capital=seed_cap,
+        seed_post_val=seed_post,
+        series_a_capital=sa_cap,
+        series_a_post_val=sa_post,
+        series_b_capital=sb_cap,
+        series_b_post_val=sb_post
+    )
+
+    exit_usd = exit_val_m * 1e6
+    payouts = wf_engine.calculate_exit_waterfall(
+        exit_valuation_usd=exit_usd,
+        is_participating_preferred=is_participating
+    )
+    pref_stack = wf_engine.get_preference_stack_total()
+    crossover_hurdles = wf_engine.get_crossover_hurdles()
+
+    # Find key shareholders
+    f_payout = next((p for p in payouts if p.category == "Founders"), None)
+    esop_payout = next((p for p in payouts if p.category == "ESOP"), None)
+    seed_payout = next((p for p in payouts if p.category == "Seed VC"), None)
+    sa_payout = next((p for p in payouts if p.category == "Series A VC"), None)
+    sb_payout = next((p for p in payouts if p.category == "Series B VC"), None)
+
+    # 2. Executive KPI Cards
+    st.markdown("#### 🏆 Exit Proceeds Summary at $" + f"{exit_val_m:.1f}M Exit")
+    kp1, kp2, kp3, kp4, kp5 = st.columns(5)
+    with kp1:
+        f_val = f_payout.proceeds_usd / 1e6 if f_payout else 0.0
+        f_pct = (f_val / exit_val_m) * 100 if exit_val_m > 0 else 0
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">FOUNDERS PROCEEDS</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #00E676;">${f_val:.2f}M</div>
+            <div style="font-size: 0.75rem; color: #718096;">{f_pct:.1f}% of total exit pool</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kp2:
+        seed_val = seed_payout.proceeds_usd / 1e6 if seed_payout else 0.0
+        seed_moic = seed_payout.moic if seed_payout else 0.0
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">SEED VC RETURN</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8;">${seed_val:.2f}M</div>
+            <div style="font-size: 0.75rem; color: #718096;">{seed_moic:.2f}x MoIC (${seed_cap/1e6:.1f}M cost)</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kp3:
+        sa_val = sa_payout.proceeds_usd / 1e6 if sa_payout else 0.0
+        sa_moic = sa_payout.moic if sa_payout else 0.0
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">SERIES A VC RETURN</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #6366f1;">${sa_val:.2f}M</div>
+            <div style="font-size: 0.75rem; color: #718096;">{sa_moic:.2f}x MoIC (${sa_cap/1e6:.1f}M cost)</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kp4:
+        sb_val = sb_payout.proceeds_usd / 1e6 if sb_payout else 0.0
+        sb_moic = sb_payout.moic if sb_payout else 0.0
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">SERIES B VC RETURN</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #ec4899;">${sb_val:.2f}M</div>
+            <div style="font-size: 0.75rem; color: #718096;">{sb_moic:.2f}x MoIC (${sb_cap/1e6:.1f}M cost)</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kp5:
+        esop_val = esop_payout.proceeds_usd / 1e6 if esop_payout else 0.0
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">ESOP POOL VALUE</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #f59e0b;">${esop_val:.2f}M</div>
+            <div style="font-size: 0.75rem; color: #718096;">Employee Wealth Created</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 3. Conversion Crossover & Downside Protection Analysis
+    st.markdown("#### ⚡ Liquidation Preference Seniority & Conversion Crossover Hurdles")
+    if exit_usd <= pref_stack:
+        st.error(
+            f"🚨 **DOWNSIDE LOSS ZONE**: The aggregate preferred liquidation preference stack is **${pref_stack/1e6:.2f}M**. "
+            f"Because this exit (${exit_val_m:.1f}M) is less than or equal to the preference stack, "
+            f"all proceeds are consumed by senior preferred investors. **Common shareholders (Founders & Employees) receive $0.00**."
+        )
+    else:
+        st.success(
+            f"🟢 **COMMON VALUE CREATION ZONE**: Exit (${exit_val_m:.1f}M) clears the aggregate preference stack of **${pref_stack/1e6:.2f}M**. "
+            f"Common shareholders participate in the remaining ${ (exit_usd - pref_stack)/1e6:.2f}M+ pool."
+        )
+
+    # Crossover Table
+    hurdle_cols = st.columns(3)
+    for idx, h in enumerate(crossover_hurdles):
+        with hurdle_cols[idx]:
+            is_converted = exit_usd >= h["crossover_exit_valuation"]
+            status_badge = "✅ CONVERTED TO COMMON" if is_converted else "🛡️ EXERCISING 1X PREFERENCE"
+            badge_color = "#00E676" if is_converted else "#FFD600"
+            st.markdown(f"""
+            <div style="background-color: #1a202c; padding: 1rem; border-radius: 8px; border-left: 4px solid {badge_color};">
+                <div style="font-weight: 700; color: #e2e8f0;">{h['class_name']}</div>
+                <div style="font-size: 0.85rem; color: #a0aec0;">Ownership: {h['ownership_pct']:.2f}% | Invested: ${h['invested_capital']/1e6:.2f}M</div>
+                <div style="font-size: 1.1rem; font-weight: 800; color: #63b3ed; margin: 0.4rem 0;">Crossover Hurdle: ${h['crossover_exit_valuation']/1e6:.1f}M</div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: {badge_color};">{status_badge}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # 4. Detailed Payout Ledger & Altair Visualization
+    st.markdown("#### 📊 Current Exit Shareholder Distribution Ledger")
+    
+    ledger_data = []
+    chart_data = []
+    for p in payouts:
+        status_label = "Converted to Common" if p.converted_to_common else "1x Liquidation Preference"
+        if p.category in ["Founders", "ESOP"]:
+            status_label = "Common Shares"
+        
+        ledger_data.append({
+            "Shareholder": p.name,
+            "Class": "Common" if p.category in ["Founders", "ESOP"] else "Preferred",
+            "Fully Diluted %": f"{p.ownership_pct:.2f}%",
+            "Capital Invested": f"${p.invested_capital/1e6:.2f}M",
+            "Exercise Status": status_label,
+            "Net Proceeds ($M)": round(p.proceeds_usd / 1e6, 2),
+            "MoIC": f"{p.moic:.2f}x" if p.invested_capital > 0 else "N/A"
+        })
+        chart_data.append({
+            "Shareholder": p.name.split(" ")[0] + (" (ESOP)" if "ESOP" in p.name else " (VC)" if "VC" in p.name else "s"),
+            "Proceeds ($M)": round(p.proceeds_usd / 1e6, 2),
+            "Category": p.category
+        })
+
+    df_ledger = pd.DataFrame(ledger_data)
+    
+    col_table, col_chart = st.columns([1.3, 1.0])
+    with col_table:
+        st.dataframe(df_ledger, use_container_width=True, hide_index=True)
+    
+    with col_chart:
+        df_chart = pd.DataFrame(chart_data)
+        chart = alt.Chart(df_chart).mark_bar(cornerRadiusTopRight=6, cornerRadiusBottomRight=6).encode(
+            x=alt.X('Proceeds ($M):Q', title='Net Exit Proceeds ($M)'),
+            y=alt.Y('Shareholder:N', sort='-x', title='Shareholder Group'),
+            color=alt.Color('Category:N', scale=alt.Scale(
+                domain=['Founders', 'Seed VC', 'Series A VC', 'Series B VC', 'ESOP'],
+                range=['#00E676', '#38bdf8', '#6366f1', '#ec4899', '#f59e0b']
+            ), legend=None),
+            tooltip=['Shareholder', 'Proceeds ($M)']
+        ).properties(height=240)
+        st.altair_chart(chart, use_container_width=True)
+
+    # 5. Multi-Exit Scenario Simulation Matrix ($10M to $1 Billion)
+    st.markdown("#### 🌐 Institutional Multi-Exit Return Matrix ($10M to $1,000M)")
+    st.write("Cross-evaluating proceeds and cash-on-cash multiples across typical exit outcomes:")
+
+    scenarios = [10_000_000, 25_000_000, 50_000_000, 100_000_000, 200_000_000, 350_000_000, 500_000_000, 1_000_000_000]
+    matrix_raw = wf_engine.run_multi_exit_matrix(scenarios)
+    
+    matrix_rows = []
+    for r in matrix_raw:
+        exit_val_display = f"${r['exit_valuation']/1e6:.0f}M"
+        f_proceeds = f"${r.get('Founders_proceeds', 0)/1e6:.1f}M"
+        seed_res = f"${r.get('Seed VC_proceeds', 0)/1e6:.1f}M ({r.get('Seed VC_moic', 0):.1f}x)"
+        sa_res = f"${r.get('Series A VC_proceeds', 0)/1e6:.1f}M ({r.get('Series A VC_moic', 0):.1f}x)"
+        sb_res = f"${r.get('Series B VC_proceeds', 0)/1e6:.1f}M ({r.get('Series B VC_moic', 0):.1f}x)"
+        esop_res = f"${r.get('ESOP_proceeds', 0)/1e6:.1f}M"
+
+        matrix_rows.append({
+            "Exit Valuation": exit_val_display,
+            "Founders Payout": f_proceeds,
+            "Seed VC ($ / MoIC)": seed_res,
+            "Series A VC ($ / MoIC)": sa_res,
+            "Series B VC ($ / MoIC)": sb_res,
+            "ESOP Pool": esop_res
+        })
+
+    df_matrix = pd.DataFrame(matrix_rows)
+    st.dataframe(df_matrix, use_container_width=True, hide_index=True)
+
+    st.info(
+        "💡 **Venture Capital Key Takeaway**: Notice that at a **$50M Exit**, Series B ($25M invested) only returns **1.0x MoIC** "
+        "and Series A ($10M invested) only returns **1.0x MoIC**, leaving almost zero upside beyond principal protection. "
+        "However, at **$350M+ exits**, the power law unlocks: Seed VC achieves **13.0x - 37.0x MoIC**, transforming the fund's DPI (Distributed to Paid-In Capital). "
+        "This structural math dictates why Tier-1 VC Investment Committees pass on good $30M businesses to chase outlier $500M+ outcomes."
+    )
+
+with tab6:
     st.subheader("Generated Investment Committee (IC) Screening Memo")
     
     temp_memo_path = os.path.join(base_dir, f"IC_Screening_Memo_{screener.company_name.replace(' ', '_')}.md")

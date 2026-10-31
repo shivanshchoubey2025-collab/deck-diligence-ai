@@ -14,11 +14,13 @@ Chennai, India | +91-XXXXXXXXXX | shivansh.choubey2025@vitstudent.ac.in
 
 ### FLAGSHIP TECHNICAL & VENTURE PROJECTS
 
-**DeckDiligence.ai — AI Pitch Deck Screener & Diligence Engine** | [GitHub Link]  
+**DeckDiligence.ai — Venture Capital Screening & Tech Due Diligence Engine** | [GitHub Link]  
 *Lead Developer & Financial Systems Architect*  
-- Engineered an automated venture diligence pipeline in Python analyzing early-stage SaaS and AI pitch decks against YC and Craft Ventures benchmarks.
-- Built a **6-point quantitative heuristic sanity engine** auditing top-down vs. bottom-up TAM disparity, token API pass-through gross margins, CAC payback, and burn multiples.
-- Implemented automated **1-page Investment Committee (IC) Screening Memo generation**, calculating Power Law fund-return exit requirements on a \$100M venture fund.
+- Engineered an institutional venture diligence platform in Python (Streamlit) analyzing early-stage SaaS and AI pitch decks against Bessemer, YC, and Craft Ventures benchmarks.
+- Built a **6-point heuristic sanity engine** auditing top-down vs. bottom-up TAM disparity, token API pass-through gross margins, CAC payback, and David Sacks Burn Multiples.
+- Architected an **AST-level repository moat scanner** parsing dependency ecosystems (`requirements.txt`) and codebases to calculate AI Wrapper Index (%), OpenAI Extinction Risk, and gross margin ceilings.
+- Modeled an institutional **multi-round cap table dilution & liquidation preference exit waterfall** ($5M to $1B exits), simulating 1x Non-Participating vs. Participating Preferred mechanics, seniority stacks ($37.5M), and conversion crossover hurdles.
+- Implemented automated **1-page Investment Committee (IC) Screening Memo generation**, calculating Power Law fund-return exit requirements on a $100M venture fund.
 
 **AR/VR Microcontroller & Embedded Systems Simulator** | [GitHub Link](https://github.com/shivanshchoubey2025-collab/ar-vr-microcontroller-simulator)  
 *Lead Systems & XR Developer*  
