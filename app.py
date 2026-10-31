@@ -15,6 +15,13 @@ import json
 import streamlit as st
 from deck_screener import PitchDeckScreener, AuditFlag
 from pdf_deck_parser import PDFPitchDeckParser
+from tech_moat_scanner import (
+    TechMoatScanner,
+    COGNIFLOW_REQUIREMENTS,
+    COGNIFLOW_CODE_SAMPLE,
+    HYPERBUZZ_REQUIREMENTS,
+    HYPERBUZZ_CODE_SAMPLE
+)
 
 st.set_page_config(
     page_title="DeckDiligence.ai | VC Pitch Deck Screener",
@@ -227,9 +234,15 @@ else:
     st.error(f"### 🚨 VERDICT: [{verdict}]\n**Action Plan**: {verdict_desc}")
 
 # -----------------------------------------------------------------------------
-# TABS: Diligence Findings, Metrics, 11-Slide Studio, and Executive IC Memo
+# TABS: Diligence Findings, Metrics, 11-Slide Studio, Tech Moat, and IC Memo
 # -----------------------------------------------------------------------------
-tab1, tab2, tab3, tab4 = st.tabs(["🔍 Heuristic Bullshit Detector", "📊 Core Venture Metrics", "🎴 11-Slide Deck Studio", "📄 1-Page Investment Memo"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "🔍 Heuristic Bullshit Detector",
+    "📊 Core Venture Metrics",
+    "🎴 11-Slide Deck Studio",
+    "🔬 Tech Moat Code Scanner",
+    "📄 1-Page Investment Memo"
+])
 
 with tab1:
     st.subheader("Automated Sanity Audits & Red Flags")
@@ -665,6 +678,134 @@ SLIDE 11: THE ASK & 18-MONTH MILESTONES
     )
 
 with tab4:
+    st.subheader("🔬 Tier-1 VC Technical Due Diligence & Code Moat Auditor")
+    st.caption("Inspects startup code repositories and package manifests to distinguish between defensible deeptech infrastructure vs. vulnerable OpenAI wrappers.")
+
+    moat_scanner = TechMoatScanner(company_name=screener.company_name)
+
+    audit_source_choice = st.radio(
+        "Select Codebase Manifest to Audit:",
+        [
+            f"Active Startup Manifest ({screener.company_name})",
+            "CogniFlow AI Benchmark (eBPF + vLLM + PyTorch)",
+            "HyperBuzz AI Benchmark (LangChain + CrewAI Wrapper)",
+            "Paste Custom requirements.txt / package.json"
+        ],
+        horizontal=True
+    )
+
+    reqs_text = ""
+    code_snippet_text = ""
+
+    if audit_source_choice == f"Active Startup Manifest ({screener.company_name})":
+        if "cogni" in screener.company_name.lower():
+            reqs_text = COGNIFLOW_REQUIREMENTS
+            code_snippet_text = COGNIFLOW_CODE_SAMPLE
+        else:
+            reqs_text = HYPERBUZZ_REQUIREMENTS
+            code_snippet_text = HYPERBUZZ_CODE_SAMPLE
+    elif audit_source_choice == "CogniFlow AI Benchmark (eBPF + vLLM + PyTorch)":
+        reqs_text = COGNIFLOW_REQUIREMENTS
+        code_snippet_text = COGNIFLOW_CODE_SAMPLE
+    elif audit_source_choice == "HyperBuzz AI Benchmark (LangChain + CrewAI Wrapper)":
+        reqs_text = HYPERBUZZ_REQUIREMENTS
+        code_snippet_text = HYPERBUZZ_CODE_SAMPLE
+    else:
+        reqs_text = st.text_area(
+            "Paste Python requirements.txt or Node package.json:",
+            value=HYPERBUZZ_REQUIREMENTS,
+            height=150
+        )
+        code_snippet_text = st.text_area(
+            "Paste Core Architecture / Kernel / Model Code Snippet (Optional):",
+            value="",
+            height=100
+        )
+
+    # Run Code Audit
+    audit_rep = moat_scanner.audit_manifests(
+        requirements_txt=reqs_text,
+        code_snippets=code_snippet_text
+    )
+
+    # Top KPI Metrics for Code Audit
+    tm1, tm2, tm3, tm4 = st.columns(4)
+    with tm1:
+        moat_score = audit_rep.defensibility_score
+        moat_color = "#00E676" if moat_score >= 75 else ("#FFD600" if moat_score >= 50 else "#FF1744")
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">ARCHITECTURAL DEFENSE</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: {moat_color};">{moat_score} <span style="font-size: 1rem; color: #718096;">/ 100</span></div>
+            <div style="font-size: 0.75rem; color: #cbd5e0;">{audit_rep.tier_classification}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with tm2:
+        ext_color = "#00E676" if "LOW" in audit_rep.extinction_risk else ("#FFD600" if "MODERATE" in audit_rep.extinction_risk else "#FF1744")
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">PLATFORM EXTINCTION RISK</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: {ext_color};">{audit_rep.extinction_risk.split('//')[0].strip()}</div>
+            <div style="font-size: 0.75rem; color: #718096;">OpenAI/Hyperscaler Risk</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with tm3:
+        margin_ceil = audit_rep.gross_margin_ceiling_pct
+        mg_color = "#00E676" if margin_ceil >= 80 else "#FF1744"
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">EST. GROSS MARGIN CAP</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: {mg_color};">~{margin_ceil:.0f}%</div>
+            <div style="font-size: 0.75rem; color: #718096;">Token COGS Drag Limit</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with tm4:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size: 0.85rem; color: #a0aec0;">SYSTEMS MOAT VS WRAPPER</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8;">{audit_rep.systems_moat_pct:.0f}% <span style="font-size: 0.9rem; color: #f43f5e;">/ {audit_rep.wrapper_index_pct:.0f}%</span></div>
+            <div style="font-size: 0.75rem; color: #718096;">Proprietary vs Wrapper %</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Technical Findings Breakdown
+    st.markdown("#### 🔬 Diagnostic Findings & Technical Defensibility")
+    
+    col_deps, col_ic_notes = st.columns([1.2, 1.0])
+    
+    with col_deps:
+        st.markdown("**Dependency Ecosystem Breakdown:**")
+        
+        # Badges for Wrapper vs Deeptech
+        if audit_rep.wrapper_libraries_found:
+            st.error(f"🚨 **Third-Party API Pass-Through Wrappers Detected ({len(audit_rep.wrapper_libraries_found)})**:\n`{'`, `'.join(audit_rep.wrapper_libraries_found)}`")
+        else:
+            st.success("🟢 **Zero Superficial Wrapper Frameworks Detected**")
+
+        if audit_rep.deeptech_libraries_found:
+            st.success(f"🟢 **Native Deeptech / Compiled ML Layers ({len(audit_rep.deeptech_libraries_found)})**:\n`{'`, `'.join(audit_rep.deeptech_libraries_found)}`")
+        else:
+            st.warning("⚠️ **No Native Deeptech / GPU / Local Model Infrastructure Detected**")
+
+        if audit_rep.infrastructure_libraries_found:
+            st.info(f"🔵 **Distributed Infrastructure & Queues ({len(audit_rep.infrastructure_libraries_found)})**:\n`{'`, `'.join(audit_rep.infrastructure_libraries_found)}`")
+
+    with col_ic_notes:
+        st.markdown("**Investment Committee Technical Verdict:**")
+        if audit_rep.defensibility_score >= 75:
+            st.success(f"### 🛡️ TIER-1 DEEP TECH MOAT\n**IC Technical Verdict**: {audit_rep.ic_recommendation}")
+        elif audit_rep.defensibility_score >= 50:
+            st.warning(f"### ⚠️ WORKFLOW MOAT / HYBRID\n**IC Technical Verdict**: {audit_rep.ic_recommendation}")
+        else:
+            st.error(f"### 🚨 LETHAL PLATFORM RISK\n**IC Technical Verdict**: {audit_rep.ic_recommendation}")
+
+    with st.expander("📄 View Audited Manifest Raw Content"):
+        st.code(reqs_text, language="text")
+
+with tab5:
     st.subheader("Generated Investment Committee (IC) Screening Memo")
     
     temp_memo_path = os.path.join(base_dir, f"IC_Screening_Memo_{screener.company_name.replace(' ', '_')}.md")
