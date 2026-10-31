@@ -14,6 +14,7 @@ import os
 import json
 import streamlit as st
 from deck_screener import PitchDeckScreener, AuditFlag
+from pdf_deck_parser import PDFPitchDeckParser
 
 st.set_page_config(
     page_title="DeckDiligence.ai | VC Pitch Deck Screener",
@@ -89,6 +90,7 @@ st.markdown("""
 base_dir = os.path.dirname(os.path.abspath(__file__))
 cogniflow_path = os.path.join(base_dir, "sample_deck_cogniflow.json")
 fluff_path = os.path.join(base_dir, "sample_deck_fluff.json")
+sample_pdf_path = os.path.join(base_dir, "Sample_Pitch_Deck_CogniFlow.pdf")
 
 # -----------------------------------------------------------------------------
 # SIDEBAR: Startup Selection & Real-Time Parameter Overrides
@@ -97,8 +99,13 @@ st.sidebar.title("💼 DeckDiligence.ai")
 st.sidebar.caption("Automated VC Pitch Deck Diligence & Sanity Engine")
 
 demo_choice = st.sidebar.selectbox(
-    "Select Benchmark Pitch Deck:",
-    ["CogniFlow AI (High-Conviction Series Seed)", "HyperBuzz AI (Hype-Driven AI Wrapper)", "Upload Custom JSON"]
+    "Select Input Source:",
+    [
+        "CogniFlow AI (High-Conviction Series Seed)",
+        "HyperBuzz AI (Hype-Driven AI Wrapper)",
+        "📄 Sample PDF Pitch Deck (11-Slide PDF Parser)",
+        "📤 Upload Pitch Deck (.pdf or .json)"
+    ]
 )
 
 deck_data = {}
@@ -108,10 +115,20 @@ if demo_choice == "CogniFlow AI (High-Conviction Series Seed)":
 elif demo_choice == "HyperBuzz AI (Hype-Driven AI Wrapper)":
     with open(fluff_path, "r", encoding="utf-8") as f:
         deck_data = json.load(f)
+elif demo_choice == "📄 Sample PDF Pitch Deck (11-Slide PDF Parser)":
+    parser = PDFPitchDeckParser(sample_pdf_path)
+    deck_data = parser.parse_to_structured_deck()
+    st.sidebar.success(f"✅ Extracted {parser.total_slides} slides from PDF!")
 else:
-    uploaded_file = st.sidebar.file_uploader("Upload Pitch Deck JSON Spec", type=["json"])
+    uploaded_file = st.sidebar.file_uploader("Upload Pitch Deck (PDF or JSON)", type=["pdf", "json"])
     if uploaded_file is not None:
-        deck_data = json.load(uploaded_file)
+        if uploaded_file.name.lower().endswith(".pdf"):
+            parser = PDFPitchDeckParser(uploaded_file)
+            deck_data = parser.parse_to_structured_deck()
+            st.sidebar.success(f"✅ Extracted {parser.total_slides} slides from `{uploaded_file.name}`!")
+        else:
+            deck_data = json.load(uploaded_file)
+            st.sidebar.success("✅ Loaded JSON spec successfully!")
     else:
         with open(cogniflow_path, "r", encoding="utf-8") as f:
             deck_data = json.load(f)
