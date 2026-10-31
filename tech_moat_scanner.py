@@ -7,12 +7,12 @@ Purpose: Audits repository dependency manifests and Python ASTs to evaluate whet
 Methodology:
   1. AST Inspection: Parses real Python ASTs (ast.Import, ast.ImportFrom) to verify
      that imported modules are functional code imports, NOT comments or string mentions.
-  2. Dependency Manifest Audit: Evaluates requirements.txt and package.json across
-     standardized wrapper, deeptech, and infrastructure library taxonomies.
-  3. COGS Margin Ceiling: Inferred based on a16z & Bessemer token unit economic benchmarks.
-Important Diligence Boundary:
-  This tool evaluates technical architecture & inference dependency exposure.
-  It CANNOT measure commercial moats (customer switching costs, data gravity, network effects).
+  2. Declared vs. Used Reconciliation: If source code is provided, declared dependencies
+     must actually be imported in code to receive technical credit.
+  3. Canonical Import Mapping: Normalizes PyPI package names to Python import names
+     (e.g., scikit-learn -> sklearn, langchain-core -> langchain_core, flash-attn -> flash_attn).
+  4. Non-Moat Utilities Removed: General utilities (numpy, redis, docker) are excluded from
+     deeptech moat scoring.
 ========================================================================================
 """
 
@@ -20,38 +20,72 @@ import os
 import ast
 import re
 import json
+import textwrap
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Optional, Set
 
 
 # -----------------------------------------------------------------------------
-# DEPENDENCY TAXONOMY (Third-Party Pass-Through vs. Native Systems & Deeptech)
+# CANONICAL PYPI PACKAGE TO PYTHON IMPORT NAME MAPPING
 # -----------------------------------------------------------------------------
-WRAPPER_INDICATORS = {
-    "python": [
-        "openai", "anthropic", "langchain", "langchain-core", "langchain-community",
-        "langchain-experimental", "crewai", "autogen", "embedchain", "flowise",
-        "cohere", "groq", "replicate", "gemini-api"
-    ],
-    "javascript": [
-        "openai", "@anthropic-ai/sdk", "langchain", "@langchain/core", "crewai",
-        "ai", "@ai-sdk/openai", "groq-sdk"
-    ]
+PACKAGE_TO_IMPORT_MAP = {
+    # Wrapper frameworks
+    "openai": "openai",
+    "anthropic": "anthropic",
+    "langchain": "langchain",
+    "langchain-core": "langchain_core",
+    "langchain-community": "langchain_community",
+    "langchain-experimental": "langchain_experimental",
+    "crewai": "crewai",
+    "autogen": "autogen",
+    "embedchain": "embedchain",
+    "cohere": "cohere",
+    "groq": "groq",
+    "replicate": "replicate",
+    
+    # Native Deeptech & Specialized Systems
+    "torch": "torch",
+    "torchvision": "torchvision",
+    "torchaudio": "torchaudio",
+    "vllm": "vllm",
+    "triton": "triton",
+    "onnx": "onnx",
+    "onnxruntime": "onnxruntime",
+    "tensorrt": "tensorrt",
+    "bitsandbytes": "bitsandbytes",
+    "accelerate": "accelerate",
+    "deepspeed": "deepspeed",
+    "transformers": "transformers",
+    "peft": "peft",
+    "bcc": "bcc",
+    "aya": "aya",
+    "scikit-learn": "sklearn",
+    "flash-attn": "flash_attn",
+    "cupy": "cupy",
+    "faiss-gpu": "faiss",
+    
+    # Distributed Infrastructure
+    "ray": "ray",
+    "grpcio": "grpc",
+    "celery": "celery",
+    "confluent-kafka": "confluent_kafka",
 }
 
-DEEPTECH_SYSTEMS_INDICATORS = {
-    "python": [
-        "torch", "torchvision", "torchaudio", "vllm", "triton", "onnx", "onnxruntime",
-        "tensorrt", "bitsandbytes", "accelerate", "deepspeed", "transformers", "peft",
-        "bcc", "aya", "bpf", "scikit-learn", "numpy", "cupy", "faiss-gpu", "flash-attn"
-    ],
-    "infrastructure": [
-        "kafka", "confluent-kafka", "nats-py", "redis", "grpcio", "celery", "ray",
-        "kubernetes", "docker", "pydantic-core"
-    ],
-    "javascript": [
-        "onnxruntime-node", "@tensorflow/tfjs", "apache-arrow", "kafkajs", "ioredis"
-    ]
+IMPORT_TO_PACKAGE_MAP = {v: k for k, v in PACKAGE_TO_IMPORT_MAP.items()}
+
+WRAPPER_PACKAGES = {
+    "openai", "anthropic", "langchain", "langchain-core", "langchain-community",
+    "langchain-experimental", "crewai", "autogen", "embedchain", "cohere", "groq", "replicate"
+}
+
+DEEPTECH_PACKAGES = {
+    "torch", "torchvision", "torchaudio", "vllm", "triton", "onnx", "onnxruntime",
+    "tensorrt", "bitsandbytes", "accelerate", "deepspeed", "transformers", "peft",
+    "bcc", "aya", "scikit-learn", "flash-attn", "cupy", "faiss-gpu"
+}
+
+INFRASTRUCTURE_PACKAGES = {
+    "ray", "grpcio", "celery", "confluent-kafka"
 }
 
 
@@ -62,7 +96,6 @@ class PythonASTImportVisitor(ast.NodeVisitor):
     """
     def __init__(self):
         self.imported_modules: Set[str] = set()
-        self.call_names: Set[str] = set()
 
     def visit_Import(self, node: ast.Import):
         for alias in node.names:
@@ -74,14 +107,6 @@ class PythonASTImportVisitor(ast.NodeVisitor):
         if node.module:
             base_mod = node.module.split(".")[0].lower()
             self.imported_modules.add(base_mod)
-        self.generic_visit(node)
-
-    def visit_Call(self, node: ast.Call):
-        # Inspect function call names (e.g. torch.cuda.is_available, openai.ChatCompletion)
-        if isinstance(node.func, ast.Attribute):
-            self.call_names.add(node.func.attr.lower())
-        elif isinstance(node.func, ast.Name):
-            self.call_names.add(node.func.id.lower())
         self.generic_visit(node)
 
 
@@ -98,6 +123,7 @@ class CodeAuditReport:
     wrapper_libraries_found: List[str]
     deeptech_libraries_found: List[str]
     infrastructure_libraries_found: List[str]
+    unused_declared_libraries: List[str]
     audit_findings: List[Dict[str, str]]
     ic_recommendation: str
     limitations_disclaimer: str = (
@@ -110,19 +136,18 @@ class TechMoatScanner:
     def __init__(self, company_name: str = "Target Startup"):
         self.company_name = company_name
 
-    def parse_python_ast(self, python_code: str) -> Set[str]:
+    def parse_python_ast(self, python_code: str) -> Tuple[Optional[Set[str]], Optional[str]]:
         """
         Parses raw Python code using Python's standard `ast` module.
-        Extracts verified import statements while ignoring comments and strings.
+        Extracts verified import statements. Rejects unparseable code with syntax errors.
         """
         try:
-            tree = ast.parse(python_code)
+            tree = ast.parse(textwrap.dedent(python_code))
             visitor = PythonASTImportVisitor()
             visitor.visit(tree)
-            return visitor.imported_modules
-        except SyntaxError:
-            # Fallback to regex if parsing partial code snippet
-            return set(re.findall(r"(?:import|from)\s+([a-zA-Z0-9_]+)", python_code))
+            return visitor.imported_modules, None
+        except SyntaxError as e:
+            return None, f"SyntaxError on line {e.lineno}: {e.msg}"
 
     def audit_manifests(
         self,
@@ -131,12 +156,12 @@ class TechMoatScanner:
         code_snippets: Optional[str] = None
     ) -> CodeAuditReport:
         """
-        Audits Python requirements.txt, Node package.json, and verified AST code imports
-        to evaluate architectural defensibility and platform extinction risk.
+        Audits Python requirements.txt, Node package.json, and verified AST code imports.
+        Enforces declared vs. used reconciliation when source code is provided.
         """
-        wrapper_found = set()
-        deeptech_found = set()
-        infra_found = set()
+        manifest_declared_pkgs = set()
+        code_imports = set()
+        syntax_error = None
 
         # 1. Parse requirements.txt
         if requirements_txt:
@@ -144,12 +169,7 @@ class TechMoatScanner:
                 line = line.strip().split("==")[0].split(">=")[0].split("<=")[0].split("~=")[0].strip().lower()
                 if not line or line.startswith("#"):
                     continue
-                if line in WRAPPER_INDICATORS["python"]:
-                    wrapper_found.add(line)
-                elif line in DEEPTECH_SYSTEMS_INDICATORS["python"]:
-                    deeptech_found.add(line)
-                elif line in DEEPTECH_SYSTEMS_INDICATORS["infrastructure"]:
-                    infra_found.add(line)
+                manifest_declared_pkgs.add(line)
 
         # 2. Parse package.json
         if package_json_str:
@@ -157,58 +177,96 @@ class TechMoatScanner:
                 pkg = json.loads(package_json_str)
                 all_deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
                 for dep in all_deps:
-                    dep_clean = dep.lower()
-                    if dep_clean in WRAPPER_INDICATORS["javascript"]:
-                        wrapper_found.add(dep_clean)
-                    elif dep_clean in DEEPTECH_SYSTEMS_INDICATORS["javascript"]:
-                        deeptech_found.add(dep_clean)
+                    manifest_declared_pkgs.add(dep.lower())
             except Exception:
                 pass
 
-        # 3. Genuine AST Parsing of Source Code (Ignores comments & non-code text)
+        # 3. Genuine AST Parsing of Source Code (No Regex Fallback)
         if code_snippets:
-            ast_imports = self.parse_python_ast(code_snippets)
-            for mod in ast_imports:
-                if mod in WRAPPER_INDICATORS["python"]:
-                    wrapper_found.add(mod)
-                elif mod in DEEPTECH_SYSTEMS_INDICATORS["python"]:
-                    deeptech_found.add(mod)
-                elif mod in DEEPTECH_SYSTEMS_INDICATORS["infrastructure"]:
-                    infra_found.add(mod)
+            imported_mods, err = self.parse_python_ast(code_snippets)
+            if err:
+                syntax_error = err
+            elif imported_mods:
+                code_imports = imported_mods
+
+        # Reconcile packages:
+        # If code is provided, packages only count if their canonical import name is found in code!
+        active_packages = set()
+        unused_packages = set()
+
+        if code_snippets and not syntax_error and code_imports:
+            # Code was provided: check which declared packages are actually imported
+            for pkg in manifest_declared_pkgs:
+                expected_import = PACKAGE_TO_IMPORT_MAP.get(pkg, pkg.replace("-", "_"))
+                if expected_import in code_imports or pkg in code_imports:
+                    active_packages.add(pkg)
+                else:
+                    unused_packages.add(pkg)
+            
+            # Also credit any imported packages that appear in code directly
+            for imp in code_imports:
+                pkg_name = IMPORT_TO_PACKAGE_MAP.get(imp, imp)
+                active_packages.add(pkg_name)
+        else:
+            # No code provided; evaluate based on manifest declarations alone
+            active_packages = set(manifest_declared_pkgs)
+
+        # Classify into taxonomies
+        wrapper_found = active_packages.intersection(WRAPPER_PACKAGES)
+        deeptech_found = active_packages.intersection(DEEPTECH_PACKAGES)
+        infra_found = active_packages.intersection(INFRASTRUCTURE_PACKAGES)
+
+        # Track unused deeptech claims
+        unused_deeptech = unused_packages.intersection(DEEPTECH_PACKAGES)
 
         # Calculate Dependency Metrics
         total_signals = len(wrapper_found) + len(deeptech_found) + len(infra_found)
         findings = []
 
+        if syntax_error:
+            findings.append({
+                "severity": "SYNTAX ERROR",
+                "title": "Unparseable Python Source Code",
+                "finding": f"AST parser failed: {syntax_error}. Code was not credited to prevent comment spoofing.",
+                "vc_impact": "Code cannot be verified automatically."
+            })
+
+        if unused_deeptech:
+            findings.append({
+                "severity": "WARNING",
+                "title": "Unused Declared Deeptech Dependencies",
+                "finding": f"Manifest declares ({', '.join(unused_deeptech)}), but AST found zero import references in code.",
+                "vc_impact": "Declared dependencies do not reflect active production architecture."
+            })
+
         if total_signals == 0:
             wrapper_index = 0.50
-            systems_moat = 0.50
+            systems_moat = 0.00
+            score = 30
+            margin_ceiling = 70.0
         else:
             wrapper_index = len(wrapper_found) / max(1.0, (len(wrapper_found) + len(deeptech_found) * 1.5))
-            systems_moat = (len(deeptech_found) * 1.5 + len(infra_found) * 0.8) / max(1.0, total_signals * 1.2)
+            systems_moat = (len(deeptech_found) * 1.5 + len(infra_found) * 0.5) / max(1.0, total_signals * 1.2)
+            wrapper_index = min(1.0, max(0.0, wrapper_index))
+            systems_moat = min(1.0, max(0.0, systems_moat))
+            score = int((systems_moat * 70) + ((1.0 - wrapper_index) * 30))
 
-        wrapper_index = min(1.0, max(0.0, wrapper_index))
-        systems_moat = min(1.0, max(0.0, systems_moat))
-
-        score = int((systems_moat * 70) + ((1.0 - wrapper_index) * 30))
-
-        # Benchmarked Gross Margin Ceilings (Source: a16z AI Financial Architecture studies)
-        if wrapper_index >= 0.70 and len(deeptech_found) == 0:
-            margin_ceiling = 60.0  # Third-party token billing caps margins
-        elif wrapper_index >= 0.40:
-            margin_ceiling = 72.0  # Hybrid inference arbitration
-        elif len(deeptech_found) >= 2:
-            margin_ceiling = 85.0  # Self-hosted / local compiled kernels
-        else:
-            margin_ceiling = 78.0
+            if wrapper_index >= 0.70 and len(deeptech_found) == 0:
+                margin_ceiling = 55.0  # Third-party variable API token COGS drag
+            elif wrapper_index >= 0.40:
+                margin_ceiling = 68.0  # Hybrid inference
+            elif len(deeptech_found) >= 2:
+                margin_ceiling = 80.0  # Self-hosted / local compiled kernels
+            else:
+                margin_ceiling = 75.0
 
         if len(wrapper_found) > 0 and len(deeptech_found) == 0:
             score = min(score, 35)
             findings.append({
                 "severity": "CRITICAL RED FLAG",
                 "title": "Third-Party API Pass-Through Architecture",
-                "finding": f"Identified wrapper dependencies ({', '.join(wrapper_found)}) with zero native local models or compiled compute runtimes.",
-                "vc_impact": "High exposure to foundation model commoditization; gross margins capped at ~60% due to variable API token bills."
+                "finding": f"Identified active wrapper dependencies ({', '.join(wrapper_found)}) with zero native local models or compiled compute runtimes.",
+                "vc_impact": "High exposure to foundation model commoditization; gross margins capped at ~55% due to variable API token bills."
             })
         elif len(wrapper_found) > 0 and len(deeptech_found) > 0:
             findings.append({
@@ -253,12 +311,12 @@ class TechMoatScanner:
             wrapper_libraries_found=list(wrapper_found),
             deeptech_libraries_found=list(deeptech_found),
             infrastructure_libraries_found=list(infra_found),
+            unused_declared_libraries=list(unused_packages),
             audit_findings=findings,
             ic_recommendation=ic_rec
         )
 
 
-# Benchmark manifests for demonstration
 COGNIFLOW_REQUIREMENTS = """
 torch==2.4.0
 vllm==0.5.4
@@ -276,7 +334,6 @@ import triton
 from bcc import BPF
 
 def run_inference_pipeline(prompt: str):
-    # Native kernel acceleration
     llm = vllm.LLM(model="meta-llama/Meta-Llama-3-8B")
     return llm.generate(prompt)
 '''
@@ -294,7 +351,6 @@ import openai
 from langchain.chains import LLMChain
 
 def generate_social_buzz(prompt: str):
-    # Pure third-party API pass-through wrapper
     client = openai.OpenAI()
     return client.chat.completions.create(model="gpt-4o", messages=[{"role": "user", "content": prompt}])
 '''

@@ -2,16 +2,18 @@
 Unit tests for PitchDeckScreener
 Validates:
   1. Missing input fields are not populated with benign fabricated defaults
-  2. Burn Multiple thresholds (<1.0, 1.0-2.0, >2.0) operate without dead zones
-  3. CAC Payback thresholds (<12, 12-18, >18) operate without dead zones
-  4. TAM Disconnect (>10x) triggers severe red flag
+  2. Missing inputs display 'Undisclosed (Data Gap)' in IC memo table rather than 'Breached/Sluggish'
+  3. Burn Multiple thresholds (<1.0, 1.0-2.0, >2.0) operate without dead zones
+  4. CAC Payback thresholds (<12, 12-18, >18) operate without dead zones
+  5. Valuation multiple tiers (<=20, 20-30, >30) operate without dead zones
 """
 
+import os
 import pytest
 from deck_screener import PitchDeckScreener
 
 
-def test_missing_data_disclosure_flags():
+def test_missing_data_disclosure_flags_and_memo():
     # Deck with completely blank claimed_metrics
     sparse_deck = {
         "company_name": "Ghost AI",
@@ -32,9 +34,21 @@ def test_missing_data_disclosure_flags():
     data_gap_flags = [f for f in screener.flags if f.category == "Transparency & Data Gaps"]
     assert len(data_gap_flags) > 0
 
+    # Verify memo does NOT label missing metrics as "Breached" or "Sluggish"
+    temp_memo = "temp_memo_test.md"
+    try:
+        screener.generate_markdown_memo(temp_memo)
+        with open(temp_memo, "r", encoding="utf-8") as f:
+            content = f.read()
+        assert "🚨 Breached" not in content
+        assert "🚨 Sluggish" not in content
+        assert "⚠️ Undisclosed (Data Gap)" in content
+    finally:
+        if os.path.exists(temp_memo):
+            os.remove(temp_memo)
+
 
 def test_cac_payback_deadzone_eliminated():
-    # 15 months payback (previously in a dead zone between 10 and 18)
     deck_15mo = {
         "company_name": "MidPayback Co",
         "claimed_metrics": {
@@ -51,11 +65,10 @@ def test_cac_payback_deadzone_eliminated():
     
     payback_flags = [f for f in s.flags if f.category == "Sales Efficiency (CAC Payback)"]
     assert len(payback_flags) == 1
-    assert payback_flags[0].severity == "YELLOW"  # 12-18 months triggers yellow
+    assert payback_flags[0].severity == "YELLOW"
 
 
 def test_burn_multiple_thresholds():
-    # 1.5x Burn multiple (previously in dead zone between 1.0 and 2.2)
     deck_1_5x = {
         "company_name": "Growing Co",
         "claimed_metrics": {
@@ -71,4 +84,24 @@ def test_burn_multiple_thresholds():
     
     burn_flags = [f for f in s.flags if f.category == "Capital Efficiency (Burn Multiple)"]
     assert len(burn_flags) == 1
-    assert burn_flags[0].severity == "YELLOW"  # 1.0x - 2.0x is yellow
+    assert burn_flags[0].severity == "YELLOW"
+
+
+def test_valuation_multiple_no_deadzones():
+    # 25x multiple (in the middle tier 20x - 30x)
+    deck_25x = {
+        "company_name": "Premium Co",
+        "claimed_post_money_valuation_usd": 25000000.0,
+        "claimed_metrics": {
+            "arr_usd": 1000000.0,  # 25x multiple
+            "claimed_tam_usd": 1e9,
+            "target_customer_count_global": 10000
+        }
+    }
+    s = PitchDeckScreener(deck_25x)
+    s.compute_derived_metrics()
+    s.run_sanity_audits()
+    
+    val_flags = [f for f in s.flags if f.category == "Valuation Discipline"]
+    assert len(val_flags) == 1
+    assert val_flags[0].severity == "YELLOW"

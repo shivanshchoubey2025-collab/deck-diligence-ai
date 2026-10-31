@@ -19,8 +19,8 @@
 | **ARR / Revenue** | $1.02M | > $1.0M for Series A | 🟢 Disclosed |
 | **Gross Margin** | 91.0% | >= 75% for Enterprise Software | 🟢 Pass |
 | **CAC Payback** | 4.4 mo | < 12 Months | 🟢 Elite |
-| **Burn Multiple** | 0.95x | < 1.0x Elite / 1.0x-2.0x Good | 🟢 Capital Efficient |
-| **Runway** | 11.5 mo | 18 - 24 Months Recommended | ⚠️ Short |
+| **Burn Multiple** | 0.95x | < 1.0x Elite / 1.0x-2.0x Good | 🟢 Elite |
+| **Runway** | 11.5 mo | 18 - 24 Months Recommended | 🚨 Short Runway |
 
 ---
 

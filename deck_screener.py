@@ -307,22 +307,31 @@ class PitchDeckScreener:
                 ))
 
         # ---------------------------------------------------------------------------------
-        # AUDIT 5: Valuation-to-ARR Multiple Discipline
+        # AUDIT 5: Valuation-to-ARR Multiple Discipline (No Dead-Zones: <=20, 20-30, >30)
         # ---------------------------------------------------------------------------------
         val_multiple = self.computed["valuation_arr_multiple"]
         arr = self.computed["arr"]
         if val_multiple is not None and arr is not None and arr > 0:
-            if val_multiple > 35.0:
+            if val_multiple > 30.0:
                 score -= 15
                 self.flags.append(AuditFlag(
                     category="Valuation Discipline",
                     severity="RED",
                     title=f"Excessive Valuation Multiple ({val_multiple:.1f}x ARR)",
                     finding=f"Company asks for ${self.post_money_usd/1e6:.1f}M post-money on only ${arr/1e6:.2f}M ARR ({val_multiple:.1f}x ARR multiple).",
-                    benchmark="Normalized early-stage venture multiples: 15x - 25x ARR.",
+                    benchmark="Normalized early-stage venture multiples: 15x - 25x ARR. Above 30x requires extraordinary top-decile growth.",
                     impact="Massive 'grow-into-valuation' risk; leaves zero room for subsequent down-rounds."
                 ))
-            elif val_multiple <= 25.0:
+            elif val_multiple > 20.0:
+                self.flags.append(AuditFlag(
+                    category="Valuation Discipline",
+                    severity="YELLOW",
+                    title=f"Premium Valuation Multiple ({val_multiple:.1f}x ARR)",
+                    finding=f"Round pricing asks for {val_multiple:.1f}x ARR, representing a growth premium.",
+                    benchmark="Standard range: 15x - 25x ARR.",
+                    impact="Acceptable if triple-digit YoY ARR growth is demonstrated in data room."
+                ))
+            else:
                 self.flags.append(AuditFlag(
                     category="Valuation Discipline",
                     severity="GREEN",
@@ -437,11 +446,11 @@ class PitchDeckScreener:
 
 | Metric | Startup Claim | Institutional Benchmark | Status |
 | :--- | :--- | :--- | :--- |
-| **ARR / Revenue** | ${ (self.computed.get('arr') or 0)/1e6:.2f}M | > $1.0M for Series A | {'🟢 Disclosed' if self.computed.get('arr') is not None else '⚠️ Undisclosed'} |
-| **Gross Margin** | {f"{(self.computed.get('gross_margin') or 0)*100:.1f}%" if self.computed.get('gross_margin') is not None else "N/A"} | >= 75% for Enterprise Software | {'🟢 Pass' if (self.computed.get('gross_margin') or 0) >= 0.75 else '🚨 Breached'} |
-| **CAC Payback** | {f"{self.computed.get('cac_payback_months'):.1f} mo" if self.computed.get('cac_payback_months') is not None else "N/A"} | < 12 Months | {'🟢 Elite' if (self.computed.get('cac_payback_months') or 99) <= 12 else '⚠️ Sluggish'} |
-| **Burn Multiple** | {f"{self.computed.get('burn_multiple'):.2f}x" if self.computed.get('burn_multiple') is not None else "N/A"} | < 1.0x Elite / 1.0x-2.0x Good | {'🟢 Capital Efficient' if (self.computed.get('burn_multiple') or 99) <= 1.5 else '🚨 Inefficient'} |
-| **Runway** | {f"{self.computed.get('runway_months'):.1f} mo" if self.computed.get('runway_months') is not None else "N/A"} | 18 - 24 Months Recommended | {'🟢 Safe' if (self.computed.get('runway_months') or 0) >= 18 else '⚠️ Short'} |
+| **ARR / Revenue** | {f"${self.computed['arr']/1e6:.2f}M" if self.computed.get('arr') is not None else "N/A"} | > $1.0M for Series A | {'🟢 Disclosed' if self.computed.get('arr') is not None else '⚠️ Undisclosed (Data Gap)'} |
+| **Gross Margin** | {f"{self.computed['gross_margin']*100:.1f}%" if self.computed.get('gross_margin') is not None else "N/A"} | >= 75% for Enterprise Software | {'⚠️ Undisclosed (Data Gap)' if self.computed.get('gross_margin') is None else ('🟢 Pass' if self.computed['gross_margin'] >= 0.75 else '🚨 Breached')} |
+| **CAC Payback** | {f"{self.computed['cac_payback_months']:.1f} mo" if self.computed.get('cac_payback_months') is not None else "N/A"} | < 12 Months | {'⚠️ Undisclosed (Data Gap)' if self.computed.get('cac_payback_months') is None else ('🟢 Elite' if self.computed['cac_payback_months'] <= 12.0 else ('🟡 Moderate' if self.computed['cac_payback_months'] <= 18.0 else '🚨 Sluggish'))} |
+| **Burn Multiple** | {f"{self.computed['burn_multiple']:.2f}x" if self.computed.get('burn_multiple') is not None else "N/A"} | < 1.0x Elite / 1.0x-2.0x Good | {'⚠️ Undisclosed (Data Gap)' if self.computed.get('burn_multiple') is None else ('🟢 Elite' if self.computed['burn_multiple'] <= 1.0 else ('🟡 Good' if self.computed['burn_multiple'] <= 2.0 else '🚨 Inefficient'))} |
+| **Runway** | {f"{self.computed['runway_months']:.1f} mo" if self.computed.get('runway_months') is not None else "N/A"} | 18 - 24 Months Recommended | {'⚠️ Undisclosed (Data Gap)' if self.computed.get('runway_months') is None else ('🟢 Safe' if self.computed['runway_months'] >= 18.0 else '🚨 Short Runway')} |
 
 ---
 

@@ -240,7 +240,7 @@ else:
 # TABS: Diligence Findings, Metrics, 11-Slide Studio, Tech Moat, Waterfall, Memo
 # -----------------------------------------------------------------------------
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "🔍 Heuristic Bullshit Detector",
+    "🔍 Quantitative Sanity Auditor",
     "📊 Core Venture Metrics",
     "🎴 11-Slide Deck Studio",
     "🔬 Tech Moat Code Scanner",
@@ -304,7 +304,7 @@ with tab2:
 
 with tab3:
     st.subheader("🎴 The 'Market Capturer' 11-Slide Pitch Deck Studio")
-    st.caption("How real top-tier VCs (Peak XV, Benchmark, YC, Blume) evaluate pitch deck slides in 2 minutes 40 seconds.")
+    st.caption("Standard venture capital heuristic framework for screening early-stage pitch deck slides.")
 
     slides_list = [
         "Slide 01: The Category Hook (One-Liner)",

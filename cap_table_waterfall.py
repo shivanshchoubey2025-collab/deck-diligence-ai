@@ -3,13 +3,13 @@
 CAP TABLE DILUTION & LIQUIDATION PREFERENCE EXIT WATERFALL ENGINE
 ----------------------------------------------------------------------------------------
 Purpose: Models round-by-round venture cap table dilution (Founders -> Seed -> A -> B)
-         and executes an equilibrium-based Liquidation Preference Exit Waterfall ($5M-$1B).
+         and executes a true Nash-Equilibrium Liquidation Preference Exit Waterfall ($1M-$1B).
 ========================================================================================
 Mechanics Covered:
   1. Multi-Round Share Ledger & Option Pool (ESOP) Dilution
-  2. Equilibrium Non-Participating Preferred Conversion (eliminates sub-preference conversions)
+  2. Bilateral Nash Equilibrium Conversion Solver (strict unilateral non-regret check)
   3. 1x Participating Preferred ("Double Dipping") Contingency Modeling
-  4. Aggregate Preference Stack Floor ($37.5M) & Proceeds Breakdown
+  4. Aggregate Preference Stack Floor ($37.5M) & Invariant Preservation
 ========================================================================================
 """
 
@@ -155,17 +155,49 @@ class CapTableWaterfallEngine:
         hurdles.sort(key=lambda x: x["seniority"])
         return hurdles
 
+    def _simulate_payout_for_state(
+        self,
+        exit_val: float,
+        converting_set: Set[str]
+    ) -> Dict[str, float]:
+        """
+        Given a set of preferred classes that choose to convert, compute the exact payouts:
+        1. Non-converting preferred claim their 1x preference in order of seniority.
+        2. Remaining proceeds are split pro-rata among Common and converting Preferred.
+        """
+        cash = exit_val
+        payouts = {h["name"]: 0.0 for h in self.cap_table}
+        preferred_classes = [h for h in self.cap_table if h["pref_multiple"] > 0]
+        
+        # 1. Senior liquidation preferences
+        non_converting = [h for h in preferred_classes if h["name"] not in converting_set]
+        non_converting.sort(key=lambda x: x["seniority"])
+        
+        for h in non_converting:
+            p = min(cash, h["invested_capital"])
+            payouts[h["name"]] = p
+            cash -= p
+
+        # 2. Remaining pro-rata pool
+        eligible = [h for h in self.cap_table if (h["pref_multiple"] == 0 or h["name"] in converting_set)]
+        sum_shares = sum(h["shares"] for h in eligible)
+        
+        if sum_shares > 0 and cash > 0:
+            for h in eligible:
+                payouts[h["name"]] = (h["shares"] / sum_shares) * cash
+
+        return payouts
+
     def calculate_exit_waterfall(
         self,
         exit_valuation_usd: float,
         is_participating_preferred: bool = False
     ) -> List[ShareholderPayout]:
         """
-        Executes an institutional Liquidation Preference Exit Waterfall with
-        game-theoretic conversion equilibrium:
-        - Rational Choice: Preferred investor converts ONLY if pro-rata common payout >= preference payout.
-        - Seniority: Series B (1) > Series A (2) > Seed (3) > Common (4).
-        - Solves across all 2^N conversion states to find the stable equilibrium payout.
+        Executes a rigorous Liquidation Preference Exit Waterfall:
+        - 1x Participating: Preferred takes 1x preference + pro-rata common pool.
+        - 1x Non-Participating: Solves for the bilateral Nash Equilibrium where NO investor
+          can unilaterally improve their payout by switching between Preference and Common.
         """
         if not self.cap_table:
             self.build_standard_venture_cap_table()
@@ -174,19 +206,15 @@ class CapTableWaterfallEngine:
         pref_names = [h["name"] for h in preferred_classes]
 
         if is_participating_preferred:
-            # -------------------------------------------------------------
             # 1X PARTICIPATING PREFERRED ("Double Dipping")
-            # -------------------------------------------------------------
             remaining_cash = exit_valuation_usd
             temp_payouts = {h["name"]: 0.0 for h in self.cap_table}
 
-            # 1. Satisfy 1x preference in order of seniority
             for h in sorted(preferred_classes, key=lambda x: x["seniority"]):
                 pref = min(remaining_cash, h["invested_capital"])
                 temp_payouts[h["name"]] += pref
                 remaining_cash -= pref
 
-            # 2. Distribute remaining cash pro-rata across ALL shares
             if remaining_cash > 0:
                 for h in self.cap_table:
                     pro_rata = (h["shares"] / self.total_shares) * remaining_cash
@@ -209,89 +237,60 @@ class CapTableWaterfallEngine:
             return payouts
 
         # -----------------------------------------------------------------
-        # 1X NON-PARTICIPATING PREFERRED (EQUILIBRIUM SOLVER)
+        # 1X NON-PARTICIPATING PREFERRED (TRUE NASH EQUILIBRIUM SOLVER)
         # -----------------------------------------------------------------
-        # For each possible subset of converting investors, compute payouts.
-        # Find the state where no preferred investor regrets their decision.
-        
-        best_payouts: Optional[Dict[str, float]] = None
-        best_conversions: Optional[Set[str]] = None
-        
-        # Test all 2^N combinations (for 3 classes = 8 states)
-        valid_equilibria = []
-
+        # Step 1: Precompute payouts for all 2^N states (N=3 -> 8 states)
+        all_states: Dict[Tuple[str, ...], Dict[str, float]] = {}
         for r in range(len(pref_names) + 1):
-            for converting_subset in itertools.combinations(pref_names, r):
-                converting_set = set(converting_subset)
-                
-                # Simulate payout for this combination
-                cash = exit_valuation_usd
-                candidate_payouts = {h["name"]: 0.0 for h in self.cap_table}
-                
-                # 1. Non-converting preferred take 1x preference in seniority order
-                non_converting = [h for h in preferred_classes if h["name"] not in converting_set]
-                non_converting.sort(key=lambda x: x["seniority"])
-                
-                for h in non_converting:
-                    pref_due = h["invested_capital"]
-                    pref_paid = min(cash, pref_due)
-                    candidate_payouts[h["name"]] = pref_paid
-                    cash -= pref_paid
+            for subset in itertools.combinations(pref_names, r):
+                all_states[subset] = self._simulate_payout_for_state(exit_valuation_usd, set(subset))
 
-                # 2. Remaining cash distributed pro-rata to Common + Converting Preferred
-                eligible_holders = [h for h in self.cap_table if (h["pref_multiple"] == 0 or h["name"] in converting_set)]
-                sum_eligible_shares = sum(h["shares"] for h in eligible_holders)
-                
-                if sum_eligible_shares > 0 and cash > 0:
-                    for h in eligible_holders:
-                        share_proceeds = (h["shares"] / sum_eligible_shares) * cash
-                        candidate_payouts[h["name"]] = share_proceeds
+        # Step 2: Identify Pure Strategy Nash Equilibria
+        # An equilibrium state S satisfies: for all preferred investors h,
+        # Payout(h in S) >= Payout(h in S_deviate)
+        nash_equilibria: List[Tuple[Set[str], Dict[str, float]]] = []
 
-                # 3. Check stability: Would any preferred holder prefer to unilaterally switch?
-                is_stable = True
-                for h in preferred_classes:
-                    name = h["name"]
-                    actual_received = candidate_payouts[name]
-                    
-                    if name in converting_set:
-                        # If converted: would they have received more by staying in preference?
-                        # Under 1x preference, they get min(available_at_their_seniority, invested_capital)
-                        # An investor NEVER rationally converts to less than their 1x preference if cash allows
-                        if actual_received < min(exit_valuation_usd, h["invested_capital"]) and actual_received < h["invested_capital"]:
-                            is_stable = False
-                            break
-                    else:
-                        # If in preference: could they have gotten strictly more by converting?
-                        # Test if their pro-rata share of remaining pool + their pref would exceed pref
-                        # We verify that conversion payout would be <= actual_received
-                        pass
+        for subset, state_payouts in all_states.items():
+            current_converting = set(subset)
+            is_nash = True
 
-                if is_stable:
-                    # Calculate total investor utility / consistency
-                    valid_equilibria.append((candidate_payouts, converting_set))
+            for h in preferred_classes:
+                name = h["name"]
+                current_pay = state_payouts[name]
 
-        # Select the equilibrium that maximizes total investor rational payoff
-        if valid_equilibria:
-            # Sort by total preferred payouts then by total converted
-            # Rational investors choose conversion state that strictly maximizes their return
-            best_payouts, best_conversions = max(
-                valid_equilibria,
-                key=lambda x: (sum(x[0][name] for name in pref_names), len(x[1]))
+                # If currently converting, test unilateral deviation to preference
+                if name in current_converting:
+                    deviated_set = current_converting - {name}
+                    deviated_subset = tuple(sorted(list(deviated_set)))
+                    pay_if_deviate = all_states[deviated_subset][name]
+                    if pay_if_deviate > current_pay + 1e-4:
+                        is_nash = False
+                        break
+                else:
+                    # If currently in preference, test unilateral deviation to converting
+                    deviated_set = current_converting | {name}
+                    deviated_subset = tuple(sorted(list(deviated_set)))
+                    pay_if_deviate = all_states[deviated_subset][name]
+                    if pay_if_deviate > current_pay + 1e-4:
+                        is_nash = False
+                        break
+
+            if is_nash:
+                nash_equilibria.append((current_converting, state_payouts))
+
+        # Step 3: Tie-breaking among equilibria
+        # If multiple equilibria exist (when indifferent at low exit values):
+        # Default to retaining liquidation preference (safest legal claim) -> min len(converting)
+        if nash_equilibria:
+            # Sort by: 1) Investor preference priority (min converting when indifferent), 2) Max total preferred payout
+            best_conversions, best_payouts = min(
+                nash_equilibria,
+                key=lambda x: (len(x[0]), -sum(x[1][name] for name in pref_names))
             )
         else:
-            # Fallback: All preferred take preference; remaining to common
-            best_payouts = {h["name"]: 0.0 for h in self.cap_table}
-            cash = exit_valuation_usd
-            for h in sorted(preferred_classes, key=lambda x: x["seniority"]):
-                p = min(cash, h["invested_capital"])
-                best_payouts[h["name"]] = p
-                cash -= p
-            common_holders = [h for h in self.cap_table if h["pref_multiple"] == 0]
-            c_shares = sum(h["shares"] for h in common_holders)
-            if cash > 0 and c_shares > 0:
-                for h in common_holders:
-                    best_payouts[h["name"]] = (h["shares"] / c_shares) * cash
+            # Fallback: All preferred take preference
             best_conversions = set()
+            best_payouts = self._simulate_payout_for_state(exit_valuation_usd, set())
 
         payouts = []
         for h in self.cap_table:
