@@ -1,0 +1,43 @@
+{
+  "company_name": "HyperBuzz AI",
+  "tagline": "The World's 1st Fully Autonomous AI CMO & Growth Engine",
+  "headquarters": "Mumbai, India",
+  "sector": "Marketing Tech / AI Wrapper",
+  "stage": "Seed",
+  "funding_ask_usd": 3000000,
+  "claimed_post_money_valuation_usd": 35000000,
+  
+  "team": [
+    {
+      "name": "Rohan Mehta",
+      "role": "CEO & Founder",
+      "background": "Ex-Brand Marketing Manager at Digital Agency; BBA from tier-3 college. No engineering background."
+    },
+    {
+      "name": "Simran Kapoor",
+      "role": "Co-Founder & Head of Growth",
+      "background": "Social media influencer with 150K followers; former fashion e-commerce consultant."
+    }
+  ],
+
+  "claimed_metrics": {
+    "mrr_usd": 22000,
+    "arr_usd": 264000,
+    "net_new_arr_last_12m_usd": 120000,
+    "monthly_net_burn_usd": 95000,
+    "cash_in_bank_usd": 180000,
+    "claimed_gross_margin_pct": 0.94,
+    "claimed_monthly_churn_pct": 0.065,
+    "claimed_cac_usd": 6500,
+    "claimed_arpu_monthly_usd": 350,
+    "claimed_tam_usd": 650000000000,
+    "target_customer_count_global": 500000,
+    "active_paying_customers": 63,
+    "has_technical_founder": false,
+    "uses_third_party_llm_apis": true,
+    "has_local_fine_tuned_models": false
+  },
+
+  "problem_statement": "Businesses spend too much money hiring human copywriters, SEO agencies, and graphic designers.",
+  "solution_statement": "An automated web dashboard that wraps ChatGPT and Midjourney APIs to auto-generate daily Instagram and LinkedIn posts."
+}

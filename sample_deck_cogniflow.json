@@ -1,0 +1,43 @@
+{
+  "company_name": "CogniFlow AI",
+  "tagline": "Autonomous Multi-Agent Reliability & Enterprise QA Platform",
+  "headquarters": "Bengaluru, India & San Francisco, CA",
+  "sector": "Enterprise Software / Developer Tooling / GenAI Infrastructure",
+  "stage": "Series Seed",
+  "funding_ask_usd": 2500000,
+  "claimed_post_money_valuation_usd": 18000000,
+  
+  "team": [
+    {
+      "name": "Aarav Sharma",
+      "role": "CEO & Co-Founder",
+      "background": "Ex-Staff Engineer at Postman; B.Tech CSE (IIT Bombay); 2 US patents in distributed tracing."
+    },
+    {
+      "name": "Neha Verma",
+      "role": "CTO & Co-Founder",
+      "background": "Ex-Machine Learning Lead at BrowserStack; M.S. Computer Science (Stanford)."
+    }
+  ],
+
+  "claimed_metrics": {
+    "mrr_usd": 85000,
+    "arr_usd": 1020000,
+    "net_new_arr_last_12m_usd": 820000,
+    "monthly_net_burn_usd": 65000,
+    "cash_in_bank_usd": 750000,
+    "claimed_gross_margin_pct": 0.91,
+    "claimed_monthly_churn_pct": 0.009,
+    "claimed_cac_usd": 4800,
+    "claimed_arpu_monthly_usd": 1200,
+    "claimed_tam_usd": 95000000000,
+    "target_customer_count_global": 120000,
+    "active_paying_customers": 71,
+    "has_technical_founder": true,
+    "uses_third_party_llm_apis": true,
+    "has_local_fine_tuned_models": true
+  },
+
+  "problem_statement": "Enterprise LLM agents fail in production >45% of the time due to non-deterministic loops, context window bloat, and uncontrolled third-party API hallucination.",
+  "solution_statement": "A lightweight runtime observability SDK that intercepts agent tool calls in under 12ms, tracks execution trees, and automatically rolls back corrupted database state."
+}
