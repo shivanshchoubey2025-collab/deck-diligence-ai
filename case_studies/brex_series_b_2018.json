@@ -1,0 +1,49 @@
+{
+  "company_name": "Brex",
+  "tagline": "The corporate card for tech startups",
+  "sector": "Fintech / Commercial Payments",
+  "stage": "Series B",
+  "funding_ask_usd": 50000000,
+  "claimed_post_money_valuation_usd": 0,
+  "deck_source": "Original 19-slide Series B pitch deck (2018) publicly documented.",
+  "slide_citations": {
+    "funding_ask": "Slide 19 ('Raising $50M Series B')",
+    "valuation": "Not disclosed on slides (negotiated with Greenoaks / DST at ~$260M post)",
+    "market_size": "Slide 7 ('$101B global B2B payments opportunity, $5.2B US venture-backed segment')",
+    "traction": "Slides 9-10 ('Over 1,000 tech companies onboarded; high spend on AWS, ads, SaaS')",
+    "churn": "Slide 11 ('Negative churn driven by startups expanding spend as they scale')",
+    "team": "Slide 3 (Henrique Dubugras - CEO; Pedro Franceschi - CTO / Engineering Lead, Ex-Pagar.me)"
+  },
+  "team": [
+    {
+      "name": "Henrique Dubugras",
+      "role": "CEO & Co-Founder",
+      "background": "Co-Founder Pagar.me (sold to Stone); Stanford drop-out",
+      "slide_citation": "Slide 3"
+    },
+    {
+      "name": "Pedro Franceschi",
+      "role": "CTO & Co-Founder",
+      "background": "Co-Founder Pagar.me; Software Engineer & Systems Architect",
+      "slide_citation": "Slide 3"
+    }
+  ],
+  "claimed_metrics": {
+    "arr_usd": null,
+    "net_new_arr_last_12m_usd": null,
+    "monthly_net_burn_usd": null,
+    "cash_in_bank_usd": null,
+    "claimed_gross_margin_pct": null,
+    "claimed_monthly_churn_pct": null,
+    "claimed_cac_usd": null,
+    "claimed_arpu_monthly_usd": null,
+    "claimed_tam_usd": 101000000000,
+    "target_customer_count_global": null,
+    "uses_third_party_llm_apis": false,
+    "has_local_fine_tuned_models": false
+  },
+  "dilution_and_financial_notes": {
+    "business_model_scope": "Brex's primary revenue driver is payment volume interchange fees (interchange spread net of reward points), not contractual SaaS subscriptions.",
+    "saas_metrics_presence": "Zero B2B SaaS recurring revenue metrics (ARR, software gross margin, CAC payback) appear on the slides, placing the business model out of domain for standard software underwriting."
+  }
+}

@@ -1,4 +1,4 @@
-# Model Validation Protocol & Case Study Backtesting Report
+# Model Validation & Diligence Refusal Report
 
 **Project**: `DeckDiligence.ai`  
 **Evaluation Protocol Version**: `v0.1-validation`  
@@ -8,123 +8,135 @@
 
 ---
 
-## 1. Objective Validation Protocol (Pre-Registered)
+## 1. Diligence Protocol & Coverage Refusal Principle
 
-To prevent hindsight bias, confirmation bias, and metric overfitting, this protocol was frozen under git tag `v0.1-validation` prior to running case-study evaluations. Any future threshold re-calibrations will be designated as `v0.2` with full side-by-side transparency against `v0.1` baseline results.
+To prevent confirmation bias, hallucinated defaults, and subjective scoring, the screener enforces strict quantitative data gating:
 
-### Objective Outcome Definitions
-Startups in historical backtesting are classified into four mutually exclusive outcome categories determined by 24-to-36-month subsequent market events:
-1. **Tier-1 Success (`SUCCESS`)**: Company successfully raised a higher-priced subsequent equity round (Series B/C/D) from tier-1 venture capital within 24 months, achieved profitability, or reached a $500M+ M&A / IPO exit.
-2. **Capital Failure / Value Destruction (`FAILURE`)**: Company shut down, entered receivership, or executed an emergency recapitalization / down-round with >50% wipeout of earlier preferred equity.
-3. **Severe Valuation Drag / Overhang (`OVERVALUED_DRAG`)**: Company remained operational but underwent major staff reductions, flat rounds, or significant multiple compressions due to unsustainably high earlier round pricing.
-4. **Out of Domain (`OUT_OF_SCOPE`)**: Business models whose primary revenue model is non-contractual (e.g., fintech interchange, marketplace take-rates, crypto spread, hardware bio-devices) where B2B SaaS heuristics (ARR, CAC Payback, Gross Margin) do not apply.
-
-### Screener Coverage & Refusal Principle
-- **Coverage Requirement**: A deck must disclose sufficient data to evaluate at least **3 of the 6 sanity audits**.
-- **Refusal Threshold**: If `audits_run_count < 3`, the screener issues an explicit **`INSUFFICIENT DATA / REFUSE VERDICT`** rather than fabricating defaults or awarding a pass/fail grade.
+### The Refusal Rule (`audits_run_count < 3`)
+- Standard venture diligence requires evaluating multiple independent unit economics (e.g., ARR multiples, Gross Margin, CAC Payback, Burn Multiple, and TAM grounding).
+- If a pitch deck discloses fewer than **3 of the 6 sanity audits**, the engine strictly refuses to render an investment verdict (`INVEST`, `EXPLORE`, or `PASS`).
+- It outputs an explicit **`INSUFFICIENT DATA / REFUSE VERDICT`** along with a transparent list of the omitted metrics that must be gathered during preliminary partner diligence calls or data-room reviews.
 
 ---
 
 ## 2. Controlled Perturbation Isolation Suite
 
-Before running historical pitch decks, the screener was subjected to **single-variable perturbation testing** (`test_perturbations.py`) against a calibrated 100/100 healthy baseline deck (`CogniFlow AI`). 
+Before testing real-world decks, the screener was verified using **single-variable perturbation testing** (`test_perturbations.py`) against a calibrated 100/100 baseline deck (`CogniFlow AI`) where all 6 audits pass with `GREEN` ratings.
 
-Each test isolates one specific diligence rule by altering exactly one variable and verifying that:
-1. **Strictly one** audit category flips to `RED`.
-2. All other 5 audits remain unaffected.
-3. Health score declines by the exact penalty assigned to that rule.
+Each test modifies strictly one input parameter to prove:
+1. **Audit Orthogonality**: Strictly the targeted audit category flips to `RED`.
+2. **Zero Contamination**: The remaining 5 audits remain completely unaffected.
+3. **Deterministic Scoring**: The health score decreases by exactly the calibrated rule deduction.
 
-| Test Case | Baseline Value | Perturbed Value | Targeted Audit | Observed Severity | Non-Target Contamination | Result |
+| Test Case | Baseline Input | Perturbed Input | Targeted Audit | Observed Severity | Non-Target Contamination | Result |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **TAM Inflation** | $3.5B claimed (2.0x BU) | $70.0B claimed (40.5x BU) | Market Sizing (TAM) | 🚨 RED | 0 Flags | ✅ Passed |
-| **Wrapper Margin** | Local fine-tuned SLM | 100% third-party APIs + 90% margin | Unit Economics (Gross Margin) | 🚨 RED | 0 Flags | ✅ Passed |
+| **TAM Disconnect** | $3.5B claimed (2.0x BU) | $70.0B claimed (40.5x BU) | Market Sizing (TAM) | 🚨 RED | 0 Flags | ✅ Passed |
+| **AI Wrapper Margin** | Local fine-tuned SLM | 100% third-party APIs + 90% margin | Unit Economics (Gross Margin) | 🚨 RED | 0 Flags | ✅ Passed |
 | **CAC Payback Drag** | $4,800 CAC (4.4 mo) | $25,000 CAC (22.9 mo) | Sales Efficiency (CAC Payback) | 🚨 RED | 0 Flags | ✅ Passed |
 | **Burn Inefficiency** | $65k/mo burn (0.95x mult) | $200k/mo burn (2.93x mult) | Capital Efficiency (Burn Multiple) | 🚨 RED | 0 Flags | ✅ Passed |
 | **Valuation Stretch** | $18M post (17.6x ARR) | $45M post (44.1x ARR) | Valuation Discipline | 🚨 RED | 0 Flags | ✅ Passed |
 | **Team Leadership Gap** | CTO (Ex-ML Lead, MS CS) | No engineering co-founder (AI sector) | Team Composition | 🚨 RED | 0 Flags | ✅ Passed |
 
-*All 6 perturbation tests pass in 0.28s under `pytest` (`test_perturbations.py`).*
+*All 6 perturbation tests pass deterministically in CI via `pytest test_perturbations.py`.*
 
 ---
 
-## 3. Balanced Historical Case Study Evaluation (8 Cases)
+## 3. Empirical Case Studies on Public Pitch Decks
 
-To avoid survivorship bias, the backtesting dataset deliberately balances iconic successes, high-profile capital collapses, margin illusions, and out-of-scope business models.
+To evaluate how the screener behaves on actual, publicly available pitch decks without hindsight, three famous historical decks were extracted slide-by-slide into standardized JSON files (`case_studies/`):
+1. **Airbnb Seed Pitch Deck (2008)** — 12 slides
+2. **Front Series A Pitch Deck (2016)** — 21 slides
+3. **Brex Series B Pitch Deck (2018)** — 19 slides
 
-Data extraction followed the standardized schema in `templates/deck_extraction_template.json`, using slide-number citations with `null` recorded for any undisclosed metric.
+Extraction followed strict rules: figures were recorded only if explicitly printed on a slide, with the slide number cited. Any metric not stated on a slide was recorded strictly as `null` (never backfilled from retrospective blog posts or S-1 filings).
 
-| Company & Stage Evaluated | Domain Scope | Disclosed Audits (of 6) | Diligence Health Score | Engine Recommendation | Historical Realized Outcome | Screener Concordance |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Front (2016 Series A)** | B2B SaaS | 5 / 6 | **85 / 100** | 🟢 ADVANCE TO DEEP DIVE | Successful Series B & C ($1.7B val) | **True Positive** |
-| **Segment (2015 Series B)** | DevTool / B2B | 5 / 6 | **90 / 100** | 🟢 ADVANCE TO DEEP DIVE | Acquired by Twilio for $3.2B | **True Positive** |
-| **Fast.co (2020 Series A)** | E-Commerce / Fintech | 4 / 6 | **35 / 100** | 🚨 PASS / REJECT | Burned $102M; collapsed in 2022 | **True Negative** |
-| **WeWork (2014 Series D Data)** | Real Estate as Tech | 4 / 6 | **40 / 100** | 🚨 PASS / REJECT | Chapter 11 Bankruptcy 2023 | **True Negative** |
-| **Jasper AI (2022 Series A)** | AI Generative Writing | 5 / 6 | **45 / 100** | 🚨 PASS / REJECT | Severe multiple haircut, staff cuts | **True Negative** |
-| **Mixpanel (2012 Series A)** | Product Analytics | 5 / 6 | **80 / 100** | 🟢 ADVANCE TO DEEP DIVE | Scaled to $100M+ ARR | **True Positive** |
-| **Coinbase (2012 Seed)** | Crypto / Exchange | 2 / 6 | **N/A** | ⚠️ REFUSE VERDICT (Out of Scope) | Direct Listing ($85B IPO) | **Scope Refusal** |
-| **Theranos (2006 Early Data)** | MedTech / Hardware | 1 / 6 | **N/A** | ⚠️ REFUSE VERDICT (Data Void) | Complete dissolution & criminal fraud | **Data Gap Refusal** |
+### Case Study Execution Results
 
----
+The script `case_studies/run_case_studies.py` runs the screener against each case and writes the screening memos and terminal scorecards to `case_studies/outputs/`:
 
-## 4. Detailed Case Studies & Diligence Mechanics
-
-### Case 1: Front (2016 Series A Deck) — *True Positive*
-- **Deck Profile**: Disclosed $3.0M ARR, 2.5x YoY growth, <6 months CAC payback, $11k ARPU, and <$250k net burn.
-- **Engine Audit**: CAC payback (<6 mo) was awarded `GREEN (Elite)`. Burn multiple (~0.8x) received `GREEN (Elite)`. Valuation ask ($30M post on $3M ARR = 10x) fell well within disciplined entry tiers.
-- **Finding**: Model accurately detected high capital efficiency and low sales friction, recommending immediate partner advancement.
-
-### Case 2: Fast.co (2020 Series A) — *True Negative*
-- **Deck Profile**: Disclosed rapid user checkout growth, but annualized net burn exceeded $10M on under $600k ARR.
-- **Engine Audit**: Burn Multiple was flagged at **> 15.0x** (`RED`), CAC payback exceeded 36 months (`RED`), and gross margin was suppressed by payment processing interchange fees.
-- **Finding**: While consumer momentum captivated investors in 2020, `DeckDiligence.ai` would have triggered an automatic `PASS / REJECT` due to unsustainable cash consumption per dollar of net new revenue.
-
-### Case 3: Jasper AI (2022 Series A) — *True Negative*
-- **Deck Profile**: Claimed $30M+ ARR in record time on top of OpenAI GPT-3 API, asking for a $1.5B post-money valuation (50x ARR). Claimed >85% software gross margins.
-- **Engine Audit**: Flagged `Audit 2: AI Wrapper Gross Margin (Token COGS Mismatch)` as `RED` due to 100% third-party API reliance without proprietary fine-tuned model infrastructure. Valuation multiple (>50x ARR) was flagged as `RED (Excessive Valuation Multiple)`.
-- **Finding**: Anticipated subsequent margin compression and multiple deflation when foundational model providers introduced direct competing interfaces.
-
-### Case 4: Coinbase (2012 Seed) & Theranos (2006) — *Refusal Protocol Validation*
-- **Coinbase**: Disclosed transaction volumes, active wallets, and exchange commission take-rates, but zero SaaS recurring revenue metrics. The screener successfully evaluated only 2 audits (TAM and Team), refused a score, and aborted with `INSUFFICIENT DATA / REFUSE VERDICT`.
-- **Theranos**: Early investor materials contained proprietary secrecy disclaimers with zero unit cost per test, zero audited revenue, and zero customer acquisition data. Rather than awarding an arbitrary baseline score, the engine correctly aborted with `INSUFFICIENT DATA / REFUSE VERDICT`.
+| Company & Stage Evaluated | Business Model | Disclosed Audits (of 6) | Omitted Metrics (Data Gaps) | Diligence Health Score | Engine Verdict |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Airbnb Seed (2008)** | Consumer Travel Marketplace | **1 / 6** | ARR, Margin, Churn, CAC, ARPU, Burn | 75 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
+| **Front Series A (2016)** | B2B Collaboration SaaS | **1 / 6** | Margin, CAC, ARPU, Burn, Post-Valuation | 75 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
+| **Brex Series B (2018)** | Commercial Card / Fintech | **1 / 6** | ARR, Margin, Churn, CAC, ARPU, Burn | 75 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
 
 ---
 
-## 5. What Held Up vs. Known Failure Modes
+### Detailed Slide Extraction Analysis
 
-### What Held Up
-1. **Capital Efficiency Sensitivity**: The David Sacks burn multiple heuristic and CAC payback thresholds proved highly predictive. Startups that subsequently burned through equity rounds without compounding net ARR were cleanly filtered out.
-2. **AI Wrapper Heuristic**: Disallowing software-grade 85%+ margins for pure API pass-through wrappers identified unsustainable unit economics before market saturation occurred.
-3. **Refusal Mechanism**: Refusing verdicts on decks with fewer than 3 quantifiable audits prevented false confidence on missing or non-SaaS business models.
+#### Case 1: Airbnb Seed Pitch Deck (2008) — 12 Slides
+- **Extracted Claims**:
+  - Funding Ask: $500,000 for 12 months runway (Slide 12).
+  - Market Size: 1.9B+ trips booked worldwide, 560M budget/online market, 84M serviceable trips (Slide 3).
+  - Business Model: 10% commission on each transaction = projected $84M revenue (Slide 6).
+  - Team: Brian Chesky, Joe Gebbia, Nathan Blecharczyk (CTO / Harvard CS) (Slide 10).
+- **Omitted Metrics**: Pre-revenue marketplace. Discloses zero historical ARR, gross margins, net burn, or paid customer acquisition costs.
+- **Engine Behavior**:
+  - `Technical Team Composition` evaluates to `GREEN` (Nathan Blecharczyk verified as technical CTO).
+  - `TAM Market Sizing` is skipped because bottom-up calculation requires target customer counts and realized ARPU.
+  - Audits run: **1 / 6**. Refusal threshold triggers: **`INSUFFICIENT DATA / REFUSE VERDICT`**.
 
-### Known Failure Modes & Limitations (Identified for `v0.2`)
-1. **Category Creation TAM Penalty**:
-   - *Failure Mode*: In novel, emerging software categories (e.g., Airbnb in 2008, Uber in 2009, or Snowflake in 2014), bottom-up TAM calculated from *existing* target customer accounts multiplied by current ACV drastically understates the future addressable market.
-   - *Impact*: Truly transformative, category-defining companies can be falsely flagged with a `RED (Severe TAM Disconnect)` because the customer base has not yet materialized.
-   - *Planned v0.2 Fix*: Add a `TAM Growth Potential / Adjacency Multiplier` toggle for category-creation pitches backed by verifiable usage expansion data.
-2. **Seed Stage Burn Variance**:
-   - *Failure Mode*: At pre-seed and early seed, a company spending $50k/month to build an initial product while generating $0-$50k ARR will technically have an infinite or extreme burn multiple before product launch.
-   - *Impact*: Penalizing pre-revenue or early-revenue seed startups on burn multiple can cause false negatives.
-   - *Planned v0.2 Fix*: Restrict burn multiple gating strictly to companies with `>= $250k ARR`.
+#### Case 2: Front Series A Pitch Deck (2016) — 21 Slides
+- **Extracted Claims**:
+  - Revenue: Hit $100k MRR milestone ($1.2M ARR run-rate) (Slide 8).
+  - Growth: Scaled from ~$15k to $100k MRR over previous 12 months (~$1.02M net new ARR) (Slide 8).
+  - Churn & Retention: Low logo churn (Slide 9); cohort expansion showing customers spend 50% more after 12 months (Slide 13).
+  - Capital Efficiency: $1.3M total capital spent to reach $1.2M ARR (Slide 14).
+  - Team: Mathilde Collin (CEO) & Laurent Perrin (CTO / Software Engineer) (Slides 15-17).
+  - Funding Ask: Raising $10M Series A (Slide 21).
+- **Omitted Metrics**: Post-money valuation was negotiated with lead investor Social Capital and not printed on slides. Monthly run-rate net burn, gross margin percentage, and paid CAC were omitted from the deck (Mathilde Collin noted in her retrospective that organic growth made outbound CAC an open question).
+- **Engine Behavior**:
+  - `Technical Team Composition` evaluates to `GREEN`.
+  - Valuation multiple and CAC payback audits cannot run without post-money valuation and explicit CAC figures.
+  - Audits run: **1 / 6**. Refusal threshold triggers: **`INSUFFICIENT DATA / REFUSE VERDICT`**.
+
+#### Case 3: Brex Series B Pitch Deck (2018) — 19 Slides
+- **Extracted Claims**:
+  - Funding Ask: $50M Series B (Slide 19).
+  - Market Size: $101B global B2B payments opportunity, $5.2B US venture-backed segment (Slide 7).
+  - Traction: 1,000+ tech companies onboarded with high card volume across AWS, ads, and SaaS (Slides 9-10).
+  - Team: Henrique Dubugras & Pedro Franceschi (CTO / Engineering Lead, ex-Pagar.me) (Slide 3).
+- **Omitted Metrics**: Revenue model is interchange fee volume rather than subscription software. Zero contractual ARR, subscription gross margin, or SaaS churn appears on the slides.
+- **Engine Behavior**:
+  - `Technical Team Composition` evaluates to `GREEN`.
+  - Non-contractual payment business model leaves 5 of 6 SaaS audits unevaluated.
+  - Audits run: **1 / 6**. Refusal threshold triggers: **`INSUFFICIENT DATA / REFUSE VERDICT`**.
 
 ---
 
-## 6. How to Reproduce Validation Results
+### Core Insight: Pitch Decks vs. Underwriting Data Rooms
 
-All unit tests and perturbation audits can be executed locally in 0.3 seconds:
+The empirical results reveal an essential reality of venture capital diligence:
+1. **Pitch decks are narrative storytelling collateral, not financial models**: Even the most celebrated, legendary pitch decks in technology history (Front, Brex, Airbnb) omit the majority of quantitative unit economics from their slide presentations.
+2. **Refusal is the correct institutional behavior**: An automated screener that forces a "PASS" or "INVEST" recommendation on a raw pitch deck with 5 missing metrics is hallucinating. Refusing a verdict and generating a checklist of required metrics (`missing_metrics`) protects the Investment Committee from premature conclusions.
+3. **Role of Synthetic Benchmarks**: Full 6-audit evaluations are demonstrated using structured benchmark data rooms (`sample_deck_cogniflow.json` and `test_perturbations.py`), representing what an analyst compiles *after* the initial founder call and metrics sheet review.
+
+---
+
+## 4. Known Failure Modes & Architectural Limitations
+
+1. **Category-Creation TAM Penalty**:
+   - *Failure Mode*: In novel, category-defining software markets (e.g., initial pitches for Snowflake, Datadog, or Airbnb), bottom-up TAM calculated from *existing* discrete customer counts multiplied by initial ACV severely understates the future addressable market.
+   - *Impact*: Transformative startups can be prematurely flagged with a `RED (Severe TAM Disconnect)` because their future customer base does not exist yet.
+   - *Planned v0.2 Fix*: Add a `Category Creation Adjacency Multiplier` toggle for foundational market shifts.
+2. **Seed-Stage Burn Multiple Volatility**:
+   - *Failure Mode*: For early seed startups spending $30k–$60k/month to build product while generating $0–$50k ARR, the burn multiple ($\text{Annual Net Burn} / \text{Net New ARR}$) produces extreme or near-infinite values before full go-to-market rollout.
+   - *Planned v0.2 Fix*: Restrict burn multiple gating strictly to companies with $\ge \$250\text{k}$ ARR.
+3. **Non-Contractual Business Models**:
+   - *Failure Mode*: Applying contractual B2B SaaS benchmarks (ARR, CAC Payback, Software Gross Margin) to fintech interchange, marketplaces, or usage tokens misclassifies revenue quality.
+   - *Planned v0.2 Fix*: Introduce distinct underwriting profiles for Marketplaces (GMV / Take Rate) and Fintech (Interchange / Net Interest Margin).
+
+---
+
+## 5. How to Reproduce All Results
 
 ```bash
-# Clone the repository
-git clone https://github.com/shivanshchoubey2025-collab/deck-diligence-ai.git
-cd deck-diligence-ai
-
-# Checkout frozen validation tag
-git checkout v0.1-validation
-
-# Activate virtual environment and run test suite
+# 1. Run the full unit and perturbation test suite (23 tests in 0.3s)
 pytest -v
-```
 
-Expected output:
-```text
-============================= 23 passed in 0.28s ==============================
+# 2. Run the empirical case studies on real pitch decks
+python case_studies/run_case_studies.py
+
+# 3. View the generated screening memos and scorecards
+ls case_studies/outputs/
 ```

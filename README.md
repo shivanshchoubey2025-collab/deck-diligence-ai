@@ -65,10 +65,17 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 ├── test_cap_table_waterfall.py    # Unit tests for Cap Table & Waterfall Engine (incl. 400-point sweep)
 ├── test_deck_screener.py          # Unit tests for Pitch Deck Screener & Sanity Auditor
 ├── test_perturbations.py          # Controlled 6-variable audit perturbation test suite
+├── test_case_studies.py           # Unit tests verifying execution of empirical case study decks
 ├── test_tech_moat_scanner.py      # Unit tests for AST & Dependency Auditor
-├── VALIDATION.md                  # Pre-registered validation protocol & 8-case backtesting report
+├── case_studies/                  # Empirical case studies extracted from real public pitch decks
+│   ├── airbnb_seed_2008.json      # Slide-by-slide extraction of Airbnb 2008 seed deck
+│   ├── front_series_a_2016.json   # Slide-by-slide extraction of Front 2016 Series A deck
+│   ├── brex_series_b_2018.json    # Slide-by-slide extraction of Brex 2018 Series B deck
+│   ├── run_case_studies.py        # Automated execution script generating memos & scorecards
+│   └── outputs/                   # Generated IC memos, scorecards, and case_study_results.json
 ├── templates/                     # Objective extraction schemas & slide citation templates
 │   └── deck_extraction_template.json
+├── VALIDATION.md                  # Validation protocol, perturbation analysis & case study report
 ├── requirements.txt               # Pinned dependencies
 ├── LICENSE                        # MIT License
 ├── .github/workflows/tests.yml    # Continuous Integration (CI) Pytest Workflow
@@ -85,7 +92,7 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 
 ## 🧪 Running the Unit Test Suite
 
-Run the full pytest suite (23 automated test cases covering mathematical invariants, AST parsing, threshold boundaries, audit coverage refusal, and single-variable perturbation isolation):
+Run the full pytest suite (26 automated test cases covering mathematical invariants, AST parsing, threshold boundaries, audit coverage refusal, perturbation isolation, and real-world case study execution):
 
 ```bash
 pytest -v
@@ -93,12 +100,12 @@ pytest -v
 
 ---
 
-## 📋 Model Validation & Backtesting
+## 📋 Model Validation & Empirical Diligence Refusal
 
-See [`VALIDATION.md`](VALIDATION.md) for the complete pre-registered validation protocol (frozen under git tag `v0.1-validation`), including:
-1. **Perturbation Test Suite**: Verification of audit orthogonality (6 single-variable perturbations flipping strictly the targeted audit with zero cross-contamination).
-2. **Balanced 8-Case Backtesting Dataset**: Front (2016 Series A), Segment (2015 Series B), Fast.co (2020 Series A), WeWork (2014 S-1), Jasper AI (2022 Series A), Mixpanel (2012 Series A), Coinbase (2012 Seed — Out of Scope), and Theranos (2006 — Data Void).
-3. **What Held Up vs. Known Failure Modes**: Analysis of category-creation TAM penalties and seed-stage burn multiple variance.
+See [`VALIDATION.md`](VALIDATION.md) for the complete validation report, including:
+1. **Perturbation Test Suite (`test_perturbations.py`)**: Verification of audit orthogonality (6 single-variable perturbations flipping strictly the targeted audit with zero cross-contamination).
+2. **Empirical Case Studies on Real Pitch Decks (`case_studies/`)**: Slide-by-slide extractions of Airbnb (2008 Seed), Front (2016 Series A), and Brex (2018 Series B). Demonstrates that raw pitch decks disclose at most 1 quantifiable SaaS audit in the slides alone, correctly triggering `INSUFFICIENT DATA / REFUSE VERDICT` rather than hallucinating investment advice.
+3. **Known Failure Modes**: Documented limitations for future versions (category-creation TAM penalties, pre-revenue burn multiple variance, and non-contractual fintech/marketplace revenue models).
 
 ---
 

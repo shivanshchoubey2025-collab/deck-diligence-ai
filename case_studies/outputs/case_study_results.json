@@ -1,0 +1,85 @@
+[
+  {
+    "company": "Airbnb Seed (2008)",
+    "filename": "airbnb_seed_2008.json",
+    "sector": "Consumer Marketplace / Travel",
+    "stage": "Seed",
+    "audits_run_count": 1,
+    "audits_run_names": [
+      "Technical Team Composition"
+    ],
+    "audits_skipped_names": [
+      "TAM Market Sizing",
+      "Gross Margin & COGS",
+      "CAC Payback Period",
+      "Burn Multiple Efficiency",
+      "Valuation ARR Multiple"
+    ],
+    "health_score": 75,
+    "verdict": "INSUFFICIENT DATA / REFUSE VERDICT",
+    "rationale": "Fewer than 3 of 6 sanity audits could be evaluated (1/6 evaluated). Pitch deck lacks minimum quantitative disclosures (e.g., ARR, Margins, Burn, CAC) to render an IC recommendation.",
+    "missing_metrics": [
+      "arr_usd",
+      "claimed_gross_margin_pct",
+      "claimed_monthly_churn_pct",
+      "claimed_cac_usd",
+      "claimed_arpu_monthly_usd",
+      "monthly_net_burn_usd"
+    ]
+  },
+  {
+    "company": "Front Series A (2016)",
+    "filename": "front_series_a_2016.json",
+    "sector": "Enterprise Software / B2B SaaS",
+    "stage": "Series A",
+    "audits_run_count": 1,
+    "audits_run_names": [
+      "Technical Team Composition"
+    ],
+    "audits_skipped_names": [
+      "TAM Market Sizing",
+      "Gross Margin & COGS",
+      "CAC Payback Period",
+      "Burn Multiple Efficiency",
+      "Valuation ARR Multiple"
+    ],
+    "health_score": 75,
+    "verdict": "INSUFFICIENT DATA / REFUSE VERDICT",
+    "rationale": "Fewer than 3 of 6 sanity audits could be evaluated (1/6 evaluated). Pitch deck lacks minimum quantitative disclosures (e.g., ARR, Margins, Burn, CAC) to render an IC recommendation.",
+    "missing_metrics": [
+      "claimed_gross_margin_pct",
+      "claimed_cac_usd",
+      "claimed_arpu_monthly_usd",
+      "monthly_net_burn_usd",
+      "claimed_tam_usd"
+    ]
+  },
+  {
+    "company": "Brex Series B (2018)",
+    "filename": "brex_series_b_2018.json",
+    "sector": "Fintech / Commercial Payments",
+    "stage": "Series B",
+    "audits_run_count": 1,
+    "audits_run_names": [
+      "Technical Team Composition"
+    ],
+    "audits_skipped_names": [
+      "TAM Market Sizing",
+      "Gross Margin & COGS",
+      "CAC Payback Period",
+      "Burn Multiple Efficiency",
+      "Valuation ARR Multiple"
+    ],
+    "health_score": 75,
+    "verdict": "INSUFFICIENT DATA / REFUSE VERDICT",
+    "rationale": "Fewer than 3 of 6 sanity audits could be evaluated (1/6 evaluated). Pitch deck lacks minimum quantitative disclosures (e.g., ARR, Margins, Burn, CAC) to render an IC recommendation.",
+    "missing_metrics": [
+      "arr_usd",
+      "claimed_gross_margin_pct",
+      "claimed_monthly_churn_pct",
+      "claimed_cac_usd",
+      "claimed_arpu_monthly_usd",
+      "monthly_net_burn_usd"
+    ]
+  }
+]
