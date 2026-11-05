@@ -33,8 +33,10 @@ class PitchDeckScreener:
         self.tagline = deck_data.get("tagline", "")
         self.sector = deck_data.get("sector", "General Tech")
         self.stage = deck_data.get("stage", "Seed")
-        self.ask_usd = float(deck_data.get("funding_ask_usd", 0.0))
-        self.post_money_usd = float(deck_data.get("claimed_post_money_valuation_usd", 0.0))
+        ask_val = deck_data.get("funding_ask_usd")
+        self.ask_usd = float(ask_val) if ask_val is not None else 0.0
+        post_val = deck_data.get("claimed_post_money_valuation_usd")
+        self.post_money_usd = float(post_val) if post_val is not None else 0.0
         self.team = deck_data.get("team", [])
         self.m = deck_data.get("claimed_metrics", {})
         

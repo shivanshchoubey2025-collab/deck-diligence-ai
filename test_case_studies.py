@@ -1,7 +1,7 @@
 """
-Unit tests for the real-world pitch deck case studies.
+Unit tests for the refusal-rate pitch deck case studies.
 Verifies that:
-  1. The 3 case study JSONs (Airbnb 2008, Front 2016, Brex 2018) load without error.
+  1. The 3 real-world case study JSONs (Airbnb 2009, Buffer 2011, Front 2016) load without error.
   2. Each case study executes cleanly through PitchDeckScreener.
   3. Each case study triggers the audit coverage refusal rule (audits_run_count < 3).
 """
@@ -13,9 +13,9 @@ from deck_screener import PitchDeckScreener
 
 
 CASES = [
-    "airbnb_seed_2008.json",
-    "front_series_a_2016.json",
-    "brex_series_b_2018.json"
+    "airbnb_seed_2009.json",
+    "buffer_seed_2011.json",
+    "front_series_a_2016.json"
 ]
 
 
@@ -26,6 +26,11 @@ def test_case_study_execution_and_refusal(filename):
 
     with open(case_path, "r", encoding="utf-8") as f:
         data = json.load(f)
+
+    # Verify provenance fields exist
+    assert "deck_url" in data, f"Missing deck_url in {filename}"
+    assert "verbatim_citations" in data, f"Missing verbatim_citations in {filename}"
+    assert data["deck_url"].startswith("https://"), f"Invalid deck_url in {filename}"
 
     screener = PitchDeckScreener(data)
     screener.compute_derived_metrics()

@@ -1,0 +1,50 @@
+{
+  "company_name": "AirBed&Breakfast (Airbnb)",
+  "tagline": "Book rooms with locals, rather than hotels",
+  "sector": "Consumer Marketplace / Travel",
+  "stage": "Seed",
+  "deck_url": "https://www.slideshare.net/slideshow/airbnbs-first-pitch-deck-15031214/45763955",
+  "deck_date": "2009",
+  "slide_count": 14,
+  "funding_ask_usd": 500000,
+  "claimed_post_money_valuation_usd": null,
+  "verbatim_citations": {
+    "funding_ask": "Slide 14 verbatim: 'We are looking for $500,000 angel financing to reach 12 months runway.'",
+    "valuation": "Slide 14: Not stated on slides (raised on convertible instrument) -> null",
+    "market_size": "Slide 5 verbatim: '1.9 Billion+ Trips Booked (Worldwide) | Total Available Market: 532M Budget & Online Trips | Serviceable Available Market: 84M Trips (AirBed & Breakfast as 15% of Market)'. No dollar TAM figure is stated on Slide 5 -> null",
+    "business_model": "Slide 7 verbatim: 'We take a 10% commission on each transaction.'",
+    "team": "Slide 11 verbatim: 'Brian Chesky: Co-founder & CEO (Industrial Design, RISD)' | 'Joe Gebbia: Co-founder (Industrial Design, RISD)' | 'Nathan Blecharczyk: Co-founder & CTO (Computer Science, Harvard)'"
+  },
+  "team": [
+    {
+      "name": "Brian Chesky",
+      "role": "Co-founder & CEO",
+      "background": "Industrial Design, RISD (Slide 11 verbatim)"
+    },
+    {
+      "name": "Joe Gebbia",
+      "role": "Co-founder",
+      "background": "Industrial Design, RISD (Slide 11 verbatim)"
+    },
+    {
+      "name": "Nathan Blecharczyk",
+      "role": "Co-founder & CTO",
+      "background": "Computer Science, Harvard (Slide 11 verbatim)"
+    }
+  ],
+  "claimed_metrics": {
+    "arr_usd": null,
+    "net_new_arr_last_12m_usd": null,
+    "monthly_net_burn_usd": null,
+    "cash_in_bank_usd": null,
+    "claimed_gross_margin_pct": null,
+    "claimed_monthly_churn_pct": null,
+    "claimed_cac_usd": null,
+    "claimed_arpu_monthly_usd": null,
+    "claimed_tam_usd": null,
+    "target_customer_count_global": null,
+    "uses_third_party_llm_apis": false,
+    "has_local_fine_tuned_models": false
+  },
+  "extraction_notes": "Checked by hand against source on 2026-11-05. Consumer marketplace pre-revenue seed deck. Zero contractual SaaS recurring revenue, gross margin, burn, or CAC figures appear on any of the 14 slides."
+}

@@ -68,9 +68,9 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 ├── test_case_studies.py           # Unit tests verifying execution of empirical case study decks
 ├── test_tech_moat_scanner.py      # Unit tests for AST & Dependency Auditor
 ├── case_studies/                  # Empirical case studies extracted from real public pitch decks
-│   ├── airbnb_seed_2008.json      # Slide-by-slide extraction of Airbnb 2008 seed deck
-│   ├── front_series_a_2016.json   # Slide-by-slide extraction of Front 2016 Series A deck
-│   ├── brex_series_b_2018.json    # Slide-by-slide extraction of Brex 2018 Series B deck
+│   ├── airbnb_seed_2009.json      # Slide-by-slide extraction of Airbnb 2009 seed deck (14 slides)
+│   ├── buffer_seed_2011.json      # Slide-by-slide extraction of Buffer 2011 seed deck (13 slides)
+│   ├── front_series_a_2016.json   # Slide-by-slide extraction of Front 2016 Series A deck (21 slides)
 │   ├── run_case_studies.py        # Automated execution script generating memos & scorecards
 │   └── outputs/                   # Generated IC memos, scorecards, and case_study_results.json
 ├── templates/                     # Objective extraction schemas & slide citation templates
@@ -100,12 +100,12 @@ pytest -v
 
 ---
 
-## 📋 Model Validation & Empirical Diligence Refusal
+## 📋 Refusal-Rate Study & Perturbation Test Suite
 
-See [`VALIDATION.md`](VALIDATION.md) for the complete validation report, including:
+See [`VALIDATION.md`](VALIDATION.md) for the complete diligence evaluation report, including:
 1. **Perturbation Test Suite (`test_perturbations.py`)**: Verification of audit orthogonality (6 single-variable perturbations flipping strictly the targeted audit with zero cross-contamination).
-2. **Empirical Case Studies on Real Pitch Decks (`case_studies/`)**: Slide-by-slide extractions of Airbnb (2008 Seed), Front (2016 Series A), and Brex (2018 Series B). Demonstrates that raw pitch decks disclose at most 1 quantifiable SaaS audit in the slides alone, correctly triggering `INSUFFICIENT DATA / REFUSE VERDICT` rather than hallucinating investment advice.
-3. **Known Failure Modes**: Documented limitations for future versions (category-creation TAM penalties, pre-revenue burn multiple variance, and non-contractual fintech/marketplace revenue models).
+2. **Refusal-Rate Study on 3 Public Pitch Decks (`case_studies/`)**: Slide-by-slide extractions checked by hand against original sources on 2026-11-05 for Airbnb (2009 Seed, 14 slides), Buffer (2011 Seed, 13 slides), and Front (2016 Series A, 21 slides). Shows that real pitch decks rarely disclose gross margin, CAC, or net burn on slides alone, leading the screener to refuse all three for missing data and generate a missing-metrics checklist rather than hallucinating investment advice.
+3. **Known Failure Modes**: Documented architectural limitations (category-creation TAM penalties, pre-revenue seed burn variance, and non-contractual fintech/marketplace models).
 
 ---
 

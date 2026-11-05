@@ -1,42 +1,44 @@
 {
   "company_name": "Front",
-  "tagline": "The shared inbox client for team communication",
+  "tagline": "The shared email client for teams",
   "sector": "Enterprise Software / B2B SaaS",
   "stage": "Series A",
+  "deck_url": "https://www.slideshare.net/MathildeCollin/front-series-a-deck-64596550",
+  "deck_date": "2016",
+  "slide_count": 21,
   "funding_ask_usd": 10000000,
-  "claimed_post_money_valuation_usd": 0,
-  "deck_source": "Original 21-slide Series A pitch deck (2016) publicly published by Mathilde Collin.",
-  "slide_citations": {
-    "funding_ask": "Slide 21 ('Raising $10M Series A')",
-    "valuation": "Not disclosed on slides (negotiated with Social Capital at ~$40M post)",
-    "arr": "Slide 8 (Traction graph displaying smooth ramp hitting the $100k MRR / $1.2M ARR milestone)",
-    "net_new_arr": "Slide 8 (Scaled from ~$15k MRR to $100k MRR over previous 12 months = ~$1.02M net new ARR)",
-    "churn": "Slide 9 ('Low logo churn') and Slide 13 ('Customers spend 50% more after 12 months')",
-    "capital_spent": "Slide 14 ('$1.3M spent to reach $1.2M ARR milestone'; run-rate monthly burn not stated)",
-    "cac_and_channels": "Omitted from deck (Mathilde Collin noted organic acquisition was flagged by investors)",
-    "team": "Slides 15-17 (Mathilde Collin - CEO; Laurent Perrin - CTO / Software Engineer)"
+  "claimed_post_money_valuation_usd": null,
+  "verbatim_citations": {
+    "funding_ask": "Slide 21 verbatim: 'RAISING $10M SERIES A TO ACCELERATE GROWTH.' -> $10,000,000",
+    "valuation": "Slide 21: Not stated on slides (negotiated with lead investor Social Capital) -> null",
+    "arr": "Slide 8 verbatim: MRR graph displaying progression to the $100k MRR milestone ($1.2M annual run rate) and 'MRR grew 5.4 times in the past 12 months' -> $1,200,000 ARR",
+    "net_new_arr": "Slide 8: Scaled from ~$18.5k MRR to $100k MRR over prior 12 months -> ~$978,000 net new ARR",
+    "churn": "Slide 9 verbatim: '~3% monthly user churn' and 'Negative Net MRR Churn' (expansion outpaces gross churn) -> 0.03",
+    "gross_margin": "Not stated on any slide -> null",
+    "cac": "Not stated on any slide (Mathilde Collin noted organic acquisition channels in retrospective) -> null",
+    "burn": "Slide 14 verbatim: '$1.3M spent to date to reach $1.2M ARR'. Monthly run-rate net burn is not stated as a line item -> null",
+    "tam": "Not stated on slides (omitted top-down macro TAM in favor of customer logos on Slide 6) -> null",
+    "team": "Slide 16 verbatim: 'Mathilde Collin - CEO, Co-founder' | 'Laurent Perrin - CTO, Co-founder'. No academic degrees are printed on the slide."
   },
   "team": [
     {
       "name": "Mathilde Collin",
-      "role": "CEO & Co-Founder",
-      "background": "HEC Paris",
-      "slide_citation": "Slide 15"
+      "role": "CEO, Co-founder",
+      "background": "CEO & Co-founder (Slide 16 verbatim)"
     },
     {
       "name": "Laurent Perrin",
-      "role": "CTO & Co-Founder",
-      "background": "Software Engineering; MS Computer Science",
-      "slide_citation": "Slide 16"
+      "role": "CTO, Co-founder",
+      "background": "CTO & Co-founder (Slide 16 verbatim; in-house engineering co-founder)"
     }
   ],
   "claimed_metrics": {
     "arr_usd": 1200000,
-    "net_new_arr_last_12m_usd": 1020000,
+    "net_new_arr_last_12m_usd": 978000,
     "monthly_net_burn_usd": null,
     "cash_in_bank_usd": null,
     "claimed_gross_margin_pct": null,
-    "claimed_monthly_churn_pct": 0.015,
+    "claimed_monthly_churn_pct": 0.03,
     "claimed_cac_usd": null,
     "claimed_arpu_monthly_usd": null,
     "claimed_tam_usd": null,
@@ -44,8 +46,5 @@
     "uses_third_party_llm_apis": false,
     "has_local_fine_tuned_models": false
   },
-  "dilution_and_financial_notes": {
-    "disclosures": "Discloses MRR and cohort expansion, but omits Gross Margin, CAC, and monthly Net Burn from the PDF deck.",
-    "tam_strategy": "Front deliberately omitted a speculative top-down TAM slide in favor of logo adoption (Slide 6) and wedge expansion proof."
-  }
+  "extraction_notes": "Checked by hand against source on 2026-11-05. Discloses MRR ($100k / $1.2M ARR), 12-month net new revenue growth (~$978k), user churn (~3%), and $10M ask, but omits Gross Margin %, monthly net burn, paid CAC, post-money valuation, and dollar TAM from the 21 slides."
 }

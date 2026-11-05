@@ -1,6 +1,6 @@
 # INVESTMENT COMMITTEE (IC) SCREENING MEMO
-**Company**: Brex | **Stage**: Series B | **Sector**: Fintech / Commercial Payments  
-**Round Ask**: $50.0M on $0.0M Post-Money Valuation  
+**Company**: AirBed&Breakfast (Airbnb) | **Stage**: Seed | **Sector**: Consumer Marketplace / Travel  
+**Round Ask**: $0.5M on $0.0M Post-Money Valuation  
 **Date**: October 2026 | **Diligence Copilot**: DeckDiligence.ai  
 
 ---
@@ -32,7 +32,7 @@
 * *None identified under current metrics disclosure.*
 
 #### ⚠️ Cautionary Observations
-* **Transparency & Data Gaps (Undisclosed Metrics in Pitch Deck (6 missing))**: The pitch deck does not disclose: arr_usd, claimed_gross_margin_pct, claimed_monthly_churn_pct, claimed_cac_usd, claimed_arpu_monthly_usd, monthly_net_burn_usd.
+* **Transparency & Data Gaps (Undisclosed Metrics in Pitch Deck (7 missing))**: The pitch deck does not disclose: arr_usd, claimed_gross_margin_pct, claimed_monthly_churn_pct, claimed_cac_usd, claimed_arpu_monthly_usd, monthly_net_burn_usd, claimed_tam_usd.
 
 #### 🟢 Validated Strengths & Positive Signals
 * **Team Composition**: Founding team has verified engineering / systems leadership.

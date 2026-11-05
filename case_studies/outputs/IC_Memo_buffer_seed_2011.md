@@ -1,16 +1,16 @@
 # INVESTMENT COMMITTEE (IC) SCREENING MEMO
-**Company**: AirBed & Breakfast (Airbnb) | **Stage**: Seed | **Sector**: Consumer Marketplace / Travel  
+**Company**: Buffer | **Stage**: Seed | **Sector**: B2B SaaS / Social Media Productivity  
 **Round Ask**: $0.5M on $0.0M Post-Money Valuation  
 **Date**: October 2026 | **Diligence Copilot**: DeckDiligence.ai  
 
 ---
 
 ### 1. EXECUTIVE VERDICT & SCORE
-* **Diligence Health Score**: **75 / 100**
+* **Diligence Health Score**: **76 / 100**
 * **IC Recommendation**: **INSUFFICIENT DATA / REFUSE VERDICT**
-* **Audit Coverage**: **1 / 6 Audits Evaluated (Technical Team Composition)**
-* **Skipped Audits (Data Gaps)**: TAM Market Sizing, Gross Margin & COGS, CAC Payback Period, Burn Multiple Efficiency, Valuation ARR Multiple
-* **Audit Summary**: 0 Red Flags | 1 Cautions | 1 Positive Signals
+* **Audit Coverage**: **2 / 6 Audits Evaluated (Gross Margin & COGS, Technical Team Composition)**
+* **Skipped Audits (Data Gaps)**: TAM Market Sizing, CAC Payback Period, Burn Multiple Efficiency, Valuation ARR Multiple
+* **Audit Summary**: 0 Red Flags | 2 Cautions | 1 Positive Signals
 
 ---
 
@@ -18,8 +18,8 @@
 
 | Metric | Startup Claim | Venture Benchmark | Status |
 | :--- | :--- | :--- | :--- |
-| **ARR / Revenue** | N/A | > $1.0M for Series A | ⚠️ Undisclosed (Data Gap) |
-| **Gross Margin** | N/A | >= 75% for Enterprise Software | ⚠️ Undisclosed (Data Gap) |
+| **ARR / Revenue** | $0.15M | > $1.0M for Series A | 🟢 Disclosed |
+| **Gross Margin** | 97.0% | >= 75% for Enterprise Software | 🟢 Pass |
 | **CAC Payback** | N/A | < 12 Months | ⚠️ Undisclosed (Data Gap) |
 | **Burn Multiple** | N/A | < 1.0x Elite / 1.0x-2.0x Good | ⚠️ Undisclosed (Data Gap) |
 | **Runway** | N/A | 18 - 24 Months Recommended | ⚠️ Undisclosed (Data Gap) |
@@ -32,10 +32,11 @@
 * *None identified under current metrics disclosure.*
 
 #### ⚠️ Cautionary Observations
-* **Transparency & Data Gaps (Undisclosed Metrics in Pitch Deck (6 missing))**: The pitch deck does not disclose: arr_usd, claimed_gross_margin_pct, claimed_monthly_churn_pct, claimed_cac_usd, claimed_arpu_monthly_usd, monthly_net_burn_usd.
+* **Transparency & Data Gaps (Undisclosed Metrics in Pitch Deck (3 missing))**: The pitch deck does not disclose: claimed_cac_usd, monthly_net_burn_usd, claimed_tam_usd.
+* **Team Composition (Non-Technical Team in Tech Venture)**: Founding team lacks documented in-house software engineering background.
 
 #### 🟢 Validated Strengths & Positive Signals
-* **Team Composition**: Founding team has verified engineering / systems leadership.
+* **Unit Economics (Gross Margin)**: Reported gross margin is 97.0%, meeting standard software margin hurdles.
 
 ---
 

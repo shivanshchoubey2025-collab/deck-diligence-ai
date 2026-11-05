@@ -1,0 +1,21 @@
+==============================================================================
+ DECKDILIGENCE.AI SCREENING SCORECARD: BUFFER
+ Sector: B2B SaaS / Social Media Productivity | Stage: Seed | Post-Money: $0.0M
+==============================================================================
+ HEALTH SCORE: 76/100 | RED FLAGS: 0 | CAUTIONS: 2 | POSITIVE: 1
+ AUDIT COVERAGE: 2/6 Audits Evaluated (4 Skipped Due to Data Gaps)
+ VERDICT: INSUFFICIENT DATA / REFUSE VERDICT
+------------------------------------------------------------------------------
+⚠️ [CAUTION] Transparency & Data Gaps — Undisclosed Metrics in Pitch Deck (3 missing)
+   Finding: The pitch deck does not disclose: claimed_cac_usd, monthly_net_burn_usd, claimed_tam_usd.
+   VC Benchmark: Standard venture decks disclose ARR, CAC, monthly gross margin, net burn, and customer churn.
+
+🟢 [POSITIVE] Unit Economics (Gross Margin) — Healthy Software Gross Margin (>= 75%)
+   Finding: Reported gross margin is 97.0%, meeting standard software margin hurdles.
+   VC Benchmark: Bessemer Cloud Index median: 75% - 80% gross margin.
+
+⚠️ [CAUTION] Team Composition — Non-Technical Team in Tech Venture
+   Finding: Founding team lacks documented in-house software engineering background.
+   VC Benchmark: Software startups benefit heavily from technical founders.
+
+==============================================================================

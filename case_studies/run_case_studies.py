@@ -1,20 +1,22 @@
 """
-Case Study Execution Script for DeckDiligence.ai.
+Empirical Refusal-Rate Case Study Script for DeckDiligence.ai.
 
 Executes PitchDeckScreener against verified, slide-extracted JSONs of real-world pitch decks:
-  1. Airbnb Seed Pitch Deck (2008)
-  2. Front Series A Pitch Deck (2016)
-  3. Brex Series B Pitch Deck (2018)
+  1. Airbnb Seed Pitch Deck (2009, 14 slides)
+  2. Buffer Seed Pitch Deck (2011, 13 slides)
+  3. Front Series A Pitch Deck (2016, 21 slides)
+
+All figures in the source JSONs were extracted and checked by hand against public slides
+on 2026-11-05 with verbatim slide citations and URLs.
 
 Outputs markdown screening memos and terminal scorecards into `case_studies/outputs/`
-and writes a consolidated results JSON to prove transparent execution without hindsight.
+and writes a consolidated results JSON documenting the refusal rate across real decks.
 """
 
 import json
 import os
 import sys
 
-# Ensure parent directory is in path to import deck_screener
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
@@ -28,15 +30,16 @@ def run_all_cases():
     os.makedirs(outputs_dir, exist_ok=True)
 
     case_files = [
-        ("Airbnb Seed (2008)", "airbnb_seed_2008.json"),
+        ("Airbnb Seed (2009)", "airbnb_seed_2009.json"),
+        ("Buffer Seed (2011)", "buffer_seed_2011.json"),
         ("Front Series A (2016)", "front_series_a_2016.json"),
-        ("Brex Series B (2018)", "brex_series_b_2018.json"),
     ]
 
     results_summary = []
 
     print("=" * 85)
-    print(" DECKDILIGENCE.AI — REAL-WORLD CASE STUDY VERIFICATION RUN")
+    print(" DECKDILIGENCE.AI — REFUSAL-RATE STUDY ON 3 PUBLIC PITCH DECKS")
+    print(" Extractions checked by hand against source slides on 2026-11-05")
     print("=" * 85)
     print(f"{'Company':<25} | {'Audits':<8} | {'Score':<6} | {'Verdict':<35}")
     print("-" * 85)
@@ -65,6 +68,8 @@ def run_all_cases():
         results_summary.append({
             "company": display_name,
             "filename": filename,
+            "deck_url": deck_data.get("deck_url"),
+            "slide_count": deck_data.get("slide_count"),
             "sector": deck_data.get("sector"),
             "stage": deck_data.get("stage"),
             "audits_run_count": screener.audits_run_count,
