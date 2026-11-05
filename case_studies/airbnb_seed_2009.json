@@ -9,9 +9,9 @@
   "funding_ask_usd": 500000,
   "claimed_post_money_valuation_usd": null,
   "verbatim_citations": {
-    "funding_ask": "Slide 14 verbatim: 'We are looking for $500,000 angel financing to reach 12 months runway.'",
-    "valuation": "Slide 14: Not stated on slides (raised on convertible instrument) -> null",
-    "market_size": "Slide 5 verbatim: '1.9 Billion+ Trips Booked (Worldwide) | Total Available Market: 532M Budget & Online Trips | Serviceable Available Market: 84M Trips (AirBed & Breakfast as 15% of Market)'. No dollar TAM figure is stated on Slide 5 -> null",
+    "funding_ask": "Slide 14 verbatim: 'We are looking for $500,000 angel financing to reach 12 months runway. 80,000 trips, $2M revenue.'",
+    "valuation": "Slide 14: Not stated on any slide -> null",
+    "market_size": "Slide 5 verbatim: '1.9 Billion+ Trips Booked (Worldwide) | 532M Budget & Online Trips | 10.6M Trips w/ AB&B'. (Note on circulating variants: Earlier draft shows 1.9B / 532M / 10.6M trips; alternative upload on SlideShare 15031214 shows 2 Billion+ / 560M / 84M trips. Crucially, neither variant states a dollar ($) TAM figure on Slide 5) -> null",
     "business_model": "Slide 7 verbatim: 'We take a 10% commission on each transaction.'",
     "team": "Slide 11 verbatim: 'Brian Chesky: Co-founder & CEO (Industrial Design, RISD)' | 'Joe Gebbia: Co-founder (Industrial Design, RISD)' | 'Nathan Blecharczyk: Co-founder & CTO (Computer Science, Harvard)'"
   },
@@ -46,5 +46,5 @@
     "uses_third_party_llm_apis": false,
     "has_local_fine_tuned_models": false
   },
-  "extraction_notes": "Checked by hand against source on 2026-11-05. Consumer marketplace pre-revenue seed deck. Zero contractual SaaS recurring revenue, gross margin, burn, or CAC figures appear on any of the 14 slides."
+  "extraction_notes": "Checked by hand against source on 2026-11-05. Verified across all 14 slides: Consumer marketplace pre-revenue seed deck. Slide 5 provides trip volume estimates (1.9B / 532M / 10.6M trips in one draft, 2B / 560M / 84M in another), but contains zero dollar TAM figures. Slide 7 states a 10% transaction commission ($25 avg fee). Slide 11 lists the 3 co-founders including technical CTO Nathan Blecharczyk (Harvard CS). Slide 14 requests $500,000 for 12 months runway. Zero SaaS recurring revenue, gross margin, burn, or CAC figures appear on any of the 14 slides. Evaluates 1 of 6 sanity audits (Technical Team Composition)."
 }

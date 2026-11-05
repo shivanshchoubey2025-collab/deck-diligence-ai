@@ -409,6 +409,17 @@ class PitchDeckScreener:
         self.health_score = max(5, min(100, score))
         return self.flags
 
+    @property
+    def effective_health_score(self) -> Optional[int]:
+        """
+        Returns the diligence health score if the minimum audit coverage threshold (>= 3 audits)
+        is met. If the deck is refused for insufficient quantitative disclosures (< 3 audits),
+        returns None to prevent treating a preliminary penalty tally as an evaluated health grade.
+        """
+        if self.audits_run_count < 3:
+            return None
+        return self.health_score
+
     def get_verdict(self) -> Tuple[str, str]:
         """Returns the high-level screening recommendation and action plan."""
         if self.audits_run_count < 3:
@@ -442,7 +453,8 @@ class PitchDeckScreener:
         output.append(f" DECKDILIGENCE.AI SCREENING SCORECARD: {self.company_name.upper()}")
         output.append(f" Sector: {self.sector} | Stage: {self.stage} | Post-Money: ${self.post_money_usd/1e6:.1f}M")
         output.append("=" * 78)
-        output.append(f" HEALTH SCORE: {self.health_score}/100 | RED FLAGS: {red_count} | CAUTIONS: {yellow_count} | POSITIVE: {green_count}")
+        score_display = f"{self.health_score}/100" if self.effective_health_score is not None else "N/A (Refused — Insufficient Coverage)"
+        output.append(f" HEALTH SCORE: {score_display} | RED FLAGS: {red_count} | CAUTIONS: {yellow_count} | POSITIVE: {green_count}")
         output.append(f" AUDIT COVERAGE: {self.audits_run_count}/6 Audits Evaluated ({len(self.audits_skipped_names)} Skipped Due to Data Gaps)")
         output.append(f" VERDICT: {verdict}")
         output.append("-" * 78)
@@ -478,6 +490,8 @@ class PitchDeckScreener:
         coverage_summary = f"{self.audits_run_count} / 6 Audits Evaluated ({', '.join(self.audits_run_names) if self.audits_run_names else 'None'})"
         skipped_summary = f"{', '.join(self.audits_skipped_names) if self.audits_skipped_names else 'None'}"
 
+        score_display = f"**{self.health_score} / 100**" if self.effective_health_score is not None else "**N/A** *(Evaluation Refused — Insufficient Audit Coverage)*"
+
         md = f"""# INVESTMENT COMMITTEE (IC) SCREENING MEMO
 **Company**: {self.company_name} | **Stage**: {self.stage} | **Sector**: {self.sector}  
 **Round Ask**: ${self.ask_usd/1e6:.1f}M on ${self.post_money_usd/1e6:.1f}M Post-Money Valuation  
@@ -486,7 +500,7 @@ class PitchDeckScreener:
 ---
 
 ### 1. EXECUTIVE VERDICT & SCORE
-* **Diligence Health Score**: **{self.health_score} / 100**
+* **Diligence Health Score**: {score_display}
 * **IC Recommendation**: **{verdict}**
 * **Audit Coverage**: **{coverage_summary}**
 * **Skipped Audits (Data Gaps)**: {skipped_summary}

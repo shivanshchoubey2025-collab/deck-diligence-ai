@@ -91,3 +91,53 @@ def test_provenance_enforcement_non_null_metrics_must_cite_slides(filename):
     # Check valuation provenance
     if data.get("claimed_post_money_valuation_usd") is not None:
         assert "valuation" in citations, f"{filename}: claimed_post_money_valuation_usd is present but missing 'valuation' citation."
+
+
+BANNED_EXTERNAL_SOURCES = [
+    "retrospective",
+    "interview",
+    "podcast",
+    "blog",
+    "article",
+    "wikipedia",
+    "techcrunch",
+    "outside knowledge",
+    "founder stated",
+    "subsequent round"
+]
+
+
+@pytest.mark.parametrize("filename", CASES)
+def test_provenance_citations_ban_external_commentary(filename):
+    """
+    Provenance Hygiene Test:
+    Citations must derive exclusively from the slide deck itself.
+    Citations referencing external post-hoc commentary (retrospectives, interviews, podcasts, articles)
+    are strictly rejected.
+    """
+    case_path = os.path.join(os.path.dirname(__file__), "case_studies", filename)
+    with open(case_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    citations = data.get("verbatim_citations", {})
+    assert len(citations) > 0, f"{filename}: verbatim_citations is empty"
+
+    for key, citation_text in citations.items():
+        assert isinstance(citation_text, str), f"{filename}: Citation '{key}' is not a string"
+        
+        # Every citation must reference a Slide, Deck, or explicit absence on slides
+        has_slide_or_deck_anchor = (
+            "Slide" in citation_text or 
+            "Deck" in citation_text or 
+            "Not stated on any slide" in citation_text
+        )
+        assert has_slide_or_deck_anchor, (
+            f"{filename}: Citation '{key}' lacks a Slide/Deck anchor: '{citation_text}'"
+        )
+
+        # Ban external retrospective sources
+        lower_text = citation_text.lower()
+        for banned in BANNED_EXTERNAL_SOURCES:
+            assert banned not in lower_text, (
+                f"{filename}: Citation '{key}' contains banned external source '{banned}': '{citation_text}'"
+            )

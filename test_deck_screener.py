@@ -136,3 +136,37 @@ def test_audit_coverage_threshold_refuses_verdict():
     finally:
         if os.path.exists(temp_memo):
             os.remove(temp_memo)
+
+
+def test_refused_deck_suppresses_health_score_to_na():
+    """
+    Decks that trigger the refusal verdict (< 3 audits evaluated) must suppress
+    their health score display to 'N/A' rather than showing a numeric penalty grade (e.g. 75/100).
+    effective_health_score must return None.
+    """
+    sparse_deck = {
+        "company_name": "Undisclosed Stealth Inc",
+        "stage": "Seed",
+        "claimed_metrics": {}
+    }
+    s = PitchDeckScreener(sparse_deck)
+    s.compute_derived_metrics()
+    s.run_sanity_audits()
+
+    assert s.audits_run_count < 3
+    assert s.effective_health_score is None
+
+    scorecard = s.generate_scorecard()
+    assert "HEALTH SCORE: N/A (Refused — Insufficient Coverage)" in scorecard
+    assert f"HEALTH SCORE: {s.health_score}/100" not in scorecard
+
+    temp_memo = "temp_refusal_memo.md"
+    try:
+        s.generate_markdown_memo(temp_memo)
+        with open(temp_memo, "r", encoding="utf-8") as f:
+            memo_content = f.read()
+        assert "* **Diligence Health Score**: **N/A** *(Evaluation Refused — Insufficient Audit Coverage)*" in memo_content
+        assert f"**{s.health_score} / 100**" not in memo_content
+    finally:
+        if os.path.exists(temp_memo):
+            os.remove(temp_memo)

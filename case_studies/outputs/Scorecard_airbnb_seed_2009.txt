@@ -2,7 +2,7 @@
  DECKDILIGENCE.AI SCREENING SCORECARD: AIRBED&BREAKFAST (AIRBNB)
  Sector: Consumer Marketplace / Travel | Stage: Seed | Post-Money: $0.0M
 ==============================================================================
- HEALTH SCORE: 75/100 | RED FLAGS: 0 | CAUTIONS: 1 | POSITIVE: 1
+ HEALTH SCORE: N/A (Refused — Insufficient Coverage) | RED FLAGS: 0 | CAUTIONS: 1 | POSITIVE: 1
  AUDIT COVERAGE: 1/6 Audits Evaluated (5 Skipped Due to Data Gaps)
  VERDICT: INSUFFICIENT DATA / REFUSE VERDICT
 ------------------------------------------------------------------------------

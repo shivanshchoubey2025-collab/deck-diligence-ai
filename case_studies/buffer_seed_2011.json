@@ -10,18 +10,18 @@
   "claimed_post_money_valuation_usd": null,
   "verbatim_citations": {
     "funding_ask": "Deck subtitle / Slide 13: 'The slide deck we used to raise half a million dollars' -> $500,000",
-    "valuation": "Not stated on slides (syndicate angel round) -> null",
+    "valuation": "Not stated on any slide -> null",
     "arr": "Slide 5 verbatim: '$150,000 annual revenue run rate'",
     "paying_users": "Slide 5 verbatim: '800 Paying Users'",
     "gross_margin": "Slide 5 verbatim: '97% margins' -> 0.97",
     "growth": "Slide 5 verbatim: 'Growing 40% month-over-month'",
     "net_new_arr": "Slide 6 verbatim: 'January 2011: Launched web app | October 2011: 55,000 users ($150K revenue run rate)' -> $150,000 net new ARR over 10 months",
     "churn": "Slide 7 verbatim: '5% churn equates to a Lifetime Value (LTV) of $240' -> 0.05",
-    "cac_note": "Slide 7 verbatim: 'allowing up to $5 to acquire a free user'. Blended paid customer acquisition cost (CAC) is not stated -> null",
+    "cac_note": "Slide 7 verbatim: 'allowing up to $5 to acquire a free user'. Blended paid customer acquisition cost (CAC) is not stated on any slide -> null",
     "arpu": "Slide 5: Computed from 800 users paying $150,000 ARR = $187.50/yr = $15.625/mo",
-    "tam": "Slide 8 verbatim: 'Of 200 million daily Tweets, 55% contain links'. No total dollar TAM printed on slide -> null",
-    "burn": "Not stated on slides -> null",
-    "team": "Slide 12 verbatim: 'Joel Gascoigne (Co-Founder) - took the idea to revenue in 7 weeks' | 'Leo Widrich (Co-Founder)'"
+    "tam": "Slide 8 verbatim: 'Of 200 million daily Tweets, 55% contain links'. No total dollar TAM printed on any slide -> null",
+    "burn": "Not stated on any slide -> null",
+    "team": "Slide 12 verbatim: 'Joel Gascoigne (Co-Founder) - took the idea to revenue in 7 weeks | Masters in Computer Science' | 'Leo Widrich (Co-Founder) - Marketeer | took Buffer from 200 to 55,000 users'"
   },
   "team": [
     {
@@ -49,5 +49,5 @@
     "uses_third_party_llm_apis": false,
     "has_local_fine_tuned_models": false
   },
-  "extraction_notes": "Checked by hand against source on 2026-11-05. Discloses revenue run rate ($150k), gross margin (97%), and churn (5%), but omits monthly net burn, paid CAC, post-money valuation, and dollar TAM from the 13 slides."
+  "extraction_notes": "Checked by hand against source on 2026-11-05. Verified across all 13 slides: Slide 5 explicitly states $150,000 annual revenue run rate, 800 paying users, and 97% margins; Slide 7 outlines freemium economics with 5% churn and $240 LTV; Slide 12 lists co-founders (including Joel Gascoigne, Masters in Computer Science); Slide 13 / subtitle notes $500,000 angel ask. Discloses 2 quantifiable sanity audits (Gross Margin and Technical Team), while monthly net burn, paid CAC, post-money valuation, and dollar TAM remain unprinted."
 }

@@ -15,7 +15,7 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 
 ### 1. 🔍 Quantitative Sanity Auditor (`deck_screener.py`)
 - Cross-references claimed startup metrics against venture benchmarks:
-  - **Audit Coverage & Refusal**: Enforces a minimum quantitative coverage threshold ($\ge 3$ of 6 sanity audits required to render an IC verdict; fewer than 3 triggers an explicit `INSUFFICIENT DATA / REFUSE VERDICT`).
+  - **Audit Coverage & Refusal**: Enforces a minimum quantitative coverage threshold ($\ge 3$ of 6 sanity audits required to render an IC verdict; fewer than 3 triggers an explicit `INSUFFICIENT DATA / REFUSE VERDICT` and suppresses health scores to `N/A`).
   - **TAM Reality Check**: Flags top-down vs. bottom-up market sizing disconnects ($>10\times$ disparity triggers red flag; $4\times\text{--}10\times$ triggers caution).
   - **Gross Margin Diligence**: Flags pure API pass-through GenAI wrappers claiming $>80\%$ gross margins without local inference layers.
   - **CAC Payback Velocity**: Categorizes customer acquisition payback into $<12\text{ mo}$ (Elite), $12\text{--}18\text{ mo}$ (Moderate), and $>18\text{ mo}$ (Sluggish).
@@ -92,7 +92,7 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 
 ## 🧪 Running the Unit Test Suite
 
-Run the full pytest suite (29 automated test cases covering mathematical invariants, AST parsing, threshold boundaries, audit coverage refusal, perturbation isolation, and provenance enforcement):
+Run the full pytest suite (33 automated test cases covering mathematical invariants, AST parsing, threshold boundaries, audit coverage refusal, health score suppression, perturbation isolation, and provenance hygiene):
 
 ```bash
 pytest -v

@@ -57,9 +57,9 @@ Every figure was extracted verbatim from its slide. Metrics not explicitly print
 
 | Company & Stage Evaluated | Verified Deck URL | Audits Evaluated | Omitted Metrics (Data Gaps) | Health Score | Engine Verdict |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Airbnb Seed (2009)** | [SlideShare (14 slides)](https://www.slideshare.net/slideshow/airbnbs-first-pitch-deck-15031214/45763955) | **1 / 6** | ARR, Margin, Churn, CAC, ARPU, Burn | 75 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
-| **Buffer Seed (2011)** | [SlideShare (13 slides)](https://www.slideshare.net/Bufferapp/buffer-seed-deck-47449800) | **2 / 6** | Burn, CAC, Post-Valuation, Dollar TAM | 76 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
-| **Front Series A (2016)** | [SlideShare (21 slides)](https://www.slideshare.net/MathildeCollin/front-series-a-deck-64596550) | **2 / 6** | Margin, CAC, ARPU, Post-Valuation, TAM | 75 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
+| **Airbnb Seed (2009)** | [SlideShare (14 slides)](https://www.slideshare.net/slideshow/airbnbs-first-pitch-deck-15031214/45763955) | **1 / 6** | ARR, Margin, Churn, CAC, ARPU, Burn | **N/A** *(Refused)* | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
+| **Buffer Seed (2011)** | [SlideShare (13 slides)](https://www.slideshare.net/Bufferapp/buffer-seed-deck-47449800) | **2 / 6** | Burn, CAC, Post-Valuation, Dollar TAM | **N/A** *(Refused)* | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
+| **Front Series A (2016)** | [SlideShare (21 slides)](https://www.slideshare.net/MathildeCollin/front-series-a-deck-64596550) | **2 / 6** | Margin, CAC, ARPU, Post-Valuation, TAM | **N/A** *(Refused)* | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
 
 ---
 
@@ -69,7 +69,8 @@ Every figure was extracted verbatim from its slide. Metrics not explicitly print
 * **Verbatim Disclosures**:
   - Funding Ask: Slide 14 verbatim: *"We are looking for $500,000 angel financing to reach 12 months runway."*
   - Business Model: Slide 7 verbatim: *"We take a 10% commission on each transaction."*
-  - Market Size: Slide 5 verbatim: *"1.9 Billion+ Trips Booked (Worldwide) | 532M Budget & Online Trips | 84M Trips (AirBed & Breakfast as 15% of Market)"*. (No total dollar TAM printed on slide).
+  - Market Size: Slide 5 verbatim (standard draft variant): *"1.9 Billion+ Trips Booked (Worldwide) | 532M Budget & Online Trips | 10.6M Trips w/ AB&B"*. (Note: An alternative widely circulated SlideShare draft shows *"2 Billion+ Trips Booked | 560M Budget & Online Trips | 84M Trips w/ AB&B"*). Crucially, **neither variant states a dollar ($) TAM figure on Slide 5**, only transaction unit volumes.
+  - Financial Milestone Ask: Slide 14 verbatim: *"We are looking for $500,000 angel financing to reach 12 months runway. 80,000 trips, $25 avg fee, $2,000,000 revenue."*
   - Team: Slide 11 verbatim: *"Brian Chesky: Co-founder & CEO (Industrial Design, RISD)"* | *"Joe Gebbia: Co-founder (Industrial Design, RISD)"* | *"Nathan Blecharczyk: Co-founder & CTO (Computer Science, Harvard)"*.
 * **Omissions**: Pre-revenue marketplace. Discloses zero historical ARR, gross margins, net burn, or paid customer acquisition costs.
 * **Audit Execution**:
@@ -97,14 +98,14 @@ Every figure was extracted verbatim from its slide. Metrics not explicitly print
 #### 3. Front Series A Pitch Deck (2016, 21 Slides)
 * **Verbatim Disclosures**:
   - Capital Efficiency & Revenue: Slide 14 verbatim: *"$1.4M in ARR achieved"*, *"$1.3M spent in 18 months"*, *"$90k Monthly burn"*, *"$1.8M Left from our last seed round"*, and *"5 months time to profitability"*.
-  - Net New Revenue: Derived from Slide 8 (*"MRR grew 5.4 times in the past 12 months"*) applied to Slide 14 ($1.4M ARR): $1.4M - ($1.4M / 5.4) = $1,140,741 net new ARR over prior 12 months.
-  - Churn: Slide 9 verbatim: *"~3% monthly user churn"* and *"Negative Net MRR Churn"*.
+  - Net New Revenue: **Derived** from Slide 8 (*"MRR grew 5.4 times in the past 12 months"*) applied to Slide 14 ($1.4M ARR): $1.4M - ($1.4M / 5.4) = $1,140,741 net new ARR over prior 12 months. (The 0.95x burn multiple rests on this derived denominator, as net new ARR was not printed as a standalone figure).
+  - Churn: Slide 9 verbatim: *"~3% monthly user churn"* and *"Negative Net MRR Churn"*. **Diligence Distinction**: Slide 9 reports user/seat-level churn (~3%/mo), whereas contractual B2B diligence distinguishes user churn from logo/account churn or net revenue retention (NRR). Front explicitly noted that expansion outpaced churn, generating negative net revenue churn.
   - Funding Ask: Slide 15 verbatim: *"RAISING $10M SERIES A TO ACCELERATE GROWTH."* (Ask is on Slide 15, not Slide 21).
   - Seed Investor: Slide 19 verbatim: *"Led by SoftTech VC"* (seed lead, not Social Capital).
   - Team: Slide 16 verbatim: *"Mathilde Collin - CEO, Co-founder"* | *"Laurent Perrin - CTO, Co-founder"*. (No academic degrees are printed on the slide).
-* **Omissions**: Post-money valuation was negotiated during the round and not stated on slides. Gross margin percentage, paid CAC, and total dollar TAM were omitted from the deck.
+* **Omissions**: Post-money valuation was negotiated during the round and not stated on slides. Gross margin percentage, paid CAC, and total dollar TAM were omitted from the deck. All retrospective commentary has been stripped from citations to ensure slide-only provenance.
 * **Audit Execution**:
-  - `Capital Efficiency (Burn Multiple)`: Evaluates to `GREEN` (0.95x burn multiple, $1.08M annual burn / $1.14M net new ARR).
+  - `Capital Efficiency (Burn Multiple)`: Evaluates to `GREEN` (0.95x burn multiple, $1.08M annual burn / $1.14M derived net new ARR).
   - `Technical Team Composition`: Evaluates to `GREEN` (Laurent Perrin verified as technical CTO).
   - 4 of 6 audits skipped (TAM, Gross Margin, CAC Payback, Valuation multiple).
   - Coverage: **2 / 6** → Triggers **`INSUFFICIENT DATA / REFUSE VERDICT`**.
@@ -137,7 +138,7 @@ Running the screener on raw pitch decks demonstrates that **the tool cannot rend
 ## 6. How to Reproduce All Results
 
 ```bash
-# 1. Run the full unit, perturbation, and case study test suite (26 tests in 0.4s)
+# 1. Run the full unit, perturbation, and case study test suite (33 tests in 0.4s)
 pytest -v
 
 # 2. Run the refusal-rate case study script on the 3 public pitch decks

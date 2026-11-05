@@ -63,7 +63,8 @@ def run_all_cases():
         with open(scorecard_path, "w", encoding="utf-8") as sf:
             sf.write(screener.generate_scorecard())
 
-        print(f"{display_name:<25} | {screener.audits_run_count}/6      | {screener.health_score:<6} | {verdict:<35}")
+        score_disp = f"{screener.effective_health_score}" if screener.effective_health_score is not None else "N/A"
+        print(f"{display_name:<25} | {screener.audits_run_count}/6      | {score_disp:<6} | {verdict:<35}")
 
         results_summary.append({
             "company": display_name,
@@ -75,7 +76,8 @@ def run_all_cases():
             "audits_run_count": screener.audits_run_count,
             "audits_run_names": screener.audits_run_names,
             "audits_skipped_names": screener.audits_skipped_names,
-            "health_score": screener.health_score,
+            "health_score": screener.effective_health_score,
+            "raw_score_before_refusal": screener.health_score,
             "verdict": verdict,
             "rationale": rationale,
             "missing_metrics": screener.missing_metrics

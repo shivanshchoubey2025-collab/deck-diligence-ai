@@ -2,7 +2,7 @@
  DECKDILIGENCE.AI SCREENING SCORECARD: BUFFER
  Sector: B2B SaaS / Social Media Productivity | Stage: Seed | Post-Money: $0.0M
 ==============================================================================
- HEALTH SCORE: 76/100 | RED FLAGS: 0 | CAUTIONS: 2 | POSITIVE: 1
+ HEALTH SCORE: N/A (Refused — Insufficient Coverage) | RED FLAGS: 0 | CAUTIONS: 2 | POSITIVE: 1
  AUDIT COVERAGE: 2/6 Audits Evaluated (4 Skipped Due to Data Gaps)
  VERDICT: INSUFFICIENT DATA / REFUSE VERDICT
 ------------------------------------------------------------------------------

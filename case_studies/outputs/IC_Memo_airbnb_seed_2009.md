@@ -6,7 +6,7 @@
 ---
 
 ### 1. EXECUTIVE VERDICT & SCORE
-* **Diligence Health Score**: **75 / 100**
+* **Diligence Health Score**: **N/A** *(Evaluation Refused — Insufficient Audit Coverage)*
 * **IC Recommendation**: **INSUFFICIENT DATA / REFUSE VERDICT**
 * **Audit Coverage**: **1 / 6 Audits Evaluated (Technical Team Composition)**
 * **Skipped Audits (Data Gaps)**: TAM Market Sizing, Gross Margin & COGS, CAC Payback Period, Burn Multiple Efficiency, Valuation ARR Multiple

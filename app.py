@@ -188,12 +188,17 @@ st.caption(f"**Sector**: {screener.sector} | **Stage**: {screener.stage} | **Loc
 # Top KPI Summary Cards
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 with kpi1:
-    score = screener.health_score
-    color_class = "score-green" if score >= 75 else ("score-yellow" if score >= 50 else "score-red")
+    if screener.effective_health_score is not None:
+        score = screener.effective_health_score
+        color_class = "score-green" if score >= 75 else ("score-yellow" if score >= 50 else "score-red")
+        score_val_str = f"{score} <span style=\"font-size: 1.2rem; color: #718096;\">/ 100</span>"
+    else:
+        color_class = "score-yellow"
+        score_val_str = "<span style=\"font-size: 1.6rem;\">N/A</span> <span style=\"font-size: 0.8rem; color: #718096;\">(Refused)</span>"
     st.markdown(f"""
     <div class="metric-card">
         <div style="font-size: 0.9rem; color: #a0aec0;">DILIGENCE HEALTH SCORE</div>
-        <div class="{color_class}">{score} <span style="font-size: 1.2rem; color: #718096;">/ 100</span></div>
+        <div class="{color_class}">{score_val_str}</div>
     </div>
     """, unsafe_allow_html=True)
 

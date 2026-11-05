@@ -10,16 +10,16 @@
   "claimed_post_money_valuation_usd": null,
   "verbatim_citations": {
     "funding_ask": "Slide 15 verbatim: 'RAISING $10M SERIES A TO ACCELERATE GROWTH.' -> $10,000,000 (ask is on Slide 15, not Slide 21)",
-    "valuation": "Slide 15: Not stated on slides (negotiated with lead investor) -> null",
+    "valuation": "Slide 15: Not stated on any slide -> null",
     "arr": "Slide 14 verbatim: '$1.4M in ARR' (and Slide 8 MRR milestone graph) -> $1,400,000 ARR",
     "net_new_arr": "Derived from Slide 8 ('MRR grew 5.4 times in the past 12 months') and Slide 14 ($1.4M ARR): $1.4M - ($1.4M / 5.4) = $1,140,741 net new ARR over prior 12 months",
     "burn": "Slide 14 verbatim: '$90k Monthly burn' -> $90,000",
     "cash": "Slide 14 verbatim: '$1.8M Left from our last seed round' -> $1,800,000",
-    "churn": "Slide 9 verbatim: '~3% monthly user churn' and 'Negative Net MRR Churn' (expansion outpaces gross churn) -> 0.03",
+    "churn": "Slide 9 verbatim: '~3% monthly user churn' (seat-level user churn, not logo or revenue churn; Slide 9 notes 'Negative Net MRR Churn' as expansion outpaces gross churn) -> 0.03",
     "gross_margin": "Not stated on any slide -> null",
-    "cac": "Not stated on any slide (Mathilde Collin noted organic acquisition channels in retrospective) -> null",
+    "cac": "Not stated on any slide -> null",
     "tam": "Not stated on slides (omitted top-down macro TAM in favor of customer logos on Slide 6) -> null",
-    "investors": "Slide 19 verbatim: 'Led by SoftTech VC' (previous seed round lead, not Social Capital)",
+    "investors": "Slide 19 verbatim: 'Led by SoftTech VC'",
     "team": "Slide 16 verbatim: 'Mathilde Collin - CEO, Co-founder' | 'Laurent Perrin - CTO, Co-founder'. No academic degrees are printed on the slide."
   },
   "team": [
@@ -48,5 +48,6 @@
     "uses_third_party_llm_apis": false,
     "has_local_fine_tuned_models": false
   },
-  "extraction_notes": "Checked by hand against source on 2026-11-05. Slide 14 explicitly provides $1.4M ARR, $90k monthly burn, and $1.8M cash remaining. Funding ask ($10M) appears on Slide 15. Prior seed lead ('Led by SoftTech VC') appears on Slide 19. Discloses 2 quantifiable audit inputs (Burn Multiple and Technical Team), while Gross Margin %, CAC, and valuation remain unprinted."
+  "extraction_notes": "Checked by hand against source on 2026-11-05. Slide 14 explicitly provides $1.4M ARR, $90k monthly burn, and $1.8M cash remaining. Funding ask ($10M) appears on Slide 15. Prior seed lead ('Led by SoftTech VC') appears on Slide 19. Discloses 2 quantifiable audit inputs (Burn Multiple and Technical Team), while Gross Margin %, CAC, and valuation remain unprinted. Churn note: Slide 9 states '~3% monthly user churn', recorded under claimed_monthly_churn_pct with churn_metric_type='user_churn'. In B2B SaaS diligence, user/seat churn differs significantly from account/logo or net revenue churn (Front concurrently reported Negative Net MRR Churn).",
+  "churn_metric_type": "user_churn"
 }
