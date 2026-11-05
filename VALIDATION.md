@@ -59,7 +59,7 @@ Every figure was extracted verbatim from its slide. Metrics not explicitly print
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Airbnb Seed (2009)** | [SlideShare (14 slides)](https://www.slideshare.net/slideshow/airbnbs-first-pitch-deck-15031214/45763955) | **1 / 6** | ARR, Margin, Churn, CAC, ARPU, Burn | 75 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
 | **Buffer Seed (2011)** | [SlideShare (13 slides)](https://www.slideshare.net/Bufferapp/buffer-seed-deck-47449800) | **2 / 6** | Burn, CAC, Post-Valuation, Dollar TAM | 76 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
-| **Front Series A (2016)** | [SlideShare (21 slides)](https://www.slideshare.net/MathildeCollin/front-series-a-deck-64596550) | **1 / 6** | Margin, CAC, ARPU, Burn, Post-Valuation | 75 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
+| **Front Series A (2016)** | [SlideShare (21 slides)](https://www.slideshare.net/MathildeCollin/front-series-a-deck-64596550) | **2 / 6** | Margin, CAC, ARPU, Post-Valuation, TAM | 75 / 100 | ⚠️ **INSUFFICIENT DATA / REFUSE VERDICT** |
 
 ---
 
@@ -96,17 +96,18 @@ Every figure was extracted verbatim from its slide. Metrics not explicitly print
 
 #### 3. Front Series A Pitch Deck (2016, 21 Slides)
 * **Verbatim Disclosures**:
-  - Revenue: Slide 8 verbatim: MRR graph displaying progression to the $100k MRR milestone ($1.2M ARR run rate) and *"MRR grew 5.4 times in the past 12 months"*.
-  - Net New Revenue: Slide 8: Scaled from ~$18.5k MRR to $100k MRR over prior 12 months (~$978,000 net new ARR).
+  - Capital Efficiency & Revenue: Slide 14 verbatim: *"$1.4M in ARR achieved"*, *"$1.3M spent in 18 months"*, *"$90k Monthly burn"*, *"$1.8M Left from our last seed round"*, and *"5 months time to profitability"*.
+  - Net New Revenue: Derived from Slide 8 (*"MRR grew 5.4 times in the past 12 months"*) applied to Slide 14 ($1.4M ARR): $1.4M - ($1.4M / 5.4) = $1,140,741 net new ARR over prior 12 months.
   - Churn: Slide 9 verbatim: *"~3% monthly user churn"* and *"Negative Net MRR Churn"*.
-  - Funding Ask: Slide 21 verbatim: *"RAISING $10M SERIES A TO ACCELERATE GROWTH."*
-  - Capital Efficiency: Slide 14 verbatim: *"$1.3M spent to date to reach $1.2M ARR"*.
-  - Team: Slide 16 verbatim: *"Mathilde Collin - CEO, Co-founder"* | *"Laurent Perrin - CTO, Co-founder"*.
-* **Omissions**: Post-money valuation was negotiated with lead investor Social Capital and not stated on slides. Gross margin percentage, paid CAC, and monthly net burn rate were omitted from the deck.
+  - Funding Ask: Slide 15 verbatim: *"RAISING $10M SERIES A TO ACCELERATE GROWTH."* (Ask is on Slide 15, not Slide 21).
+  - Seed Investor: Slide 19 verbatim: *"Led by SoftTech VC"* (seed lead, not Social Capital).
+  - Team: Slide 16 verbatim: *"Mathilde Collin - CEO, Co-founder"* | *"Laurent Perrin - CTO, Co-founder"*. (No academic degrees are printed on the slide).
+* **Omissions**: Post-money valuation was negotiated during the round and not stated on slides. Gross margin percentage, paid CAC, and total dollar TAM were omitted from the deck.
 * **Audit Execution**:
+  - `Capital Efficiency (Burn Multiple)`: Evaluates to `GREEN` (0.95x burn multiple, $1.08M annual burn / $1.14M net new ARR).
   - `Technical Team Composition`: Evaluates to `GREEN` (Laurent Perrin verified as technical CTO).
-  - 5 of 6 audits skipped.
-  - Coverage: **1 / 6** → Triggers **`INSUFFICIENT DATA / REFUSE VERDICT`**.
+  - 4 of 6 audits skipped (TAM, Gross Margin, CAC Payback, Valuation multiple).
+  - Coverage: **2 / 6** → Triggers **`INSUFFICIENT DATA / REFUSE VERDICT`**.
 
 ---
 

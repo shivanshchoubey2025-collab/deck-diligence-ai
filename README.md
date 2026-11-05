@@ -92,7 +92,7 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 
 ## 🧪 Running the Unit Test Suite
 
-Run the full pytest suite (26 automated test cases covering mathematical invariants, AST parsing, threshold boundaries, audit coverage refusal, perturbation isolation, and real-world case study execution):
+Run the full pytest suite (29 automated test cases covering mathematical invariants, AST parsing, threshold boundaries, audit coverage refusal, perturbation isolation, and provenance enforcement):
 
 ```bash
 pytest -v

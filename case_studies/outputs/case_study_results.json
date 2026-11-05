@@ -64,25 +64,24 @@
     "slide_count": 21,
     "sector": "Enterprise Software / B2B SaaS",
     "stage": "Series A",
-    "audits_run_count": 1,
+    "audits_run_count": 2,
     "audits_run_names": [
+      "Burn Multiple Efficiency",
       "Technical Team Composition"
     ],
     "audits_skipped_names": [
       "TAM Market Sizing",
       "Gross Margin & COGS",
       "CAC Payback Period",
-      "Burn Multiple Efficiency",
       "Valuation ARR Multiple"
     ],
     "health_score": 75,
     "verdict": "INSUFFICIENT DATA / REFUSE VERDICT",
-    "rationale": "Fewer than 3 of 6 sanity audits could be evaluated (1/6 evaluated). Pitch deck lacks minimum quantitative disclosures (e.g., ARR, Margins, Burn, CAC) to render an IC recommendation.",
+    "rationale": "Fewer than 3 of 6 sanity audits could be evaluated (2/6 evaluated). Pitch deck lacks minimum quantitative disclosures (e.g., ARR, Margins, Burn, CAC) to render an IC recommendation.",
     "missing_metrics": [
       "claimed_gross_margin_pct",
       "claimed_cac_usd",
       "claimed_arpu_monthly_usd",
-      "monthly_net_burn_usd",
       "claimed_tam_usd"
     ]
   }

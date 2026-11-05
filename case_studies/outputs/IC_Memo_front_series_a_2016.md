@@ -8,9 +8,9 @@
 ### 1. EXECUTIVE VERDICT & SCORE
 * **Diligence Health Score**: **75 / 100**
 * **IC Recommendation**: **INSUFFICIENT DATA / REFUSE VERDICT**
-* **Audit Coverage**: **1 / 6 Audits Evaluated (Technical Team Composition)**
-* **Skipped Audits (Data Gaps)**: TAM Market Sizing, Gross Margin & COGS, CAC Payback Period, Burn Multiple Efficiency, Valuation ARR Multiple
-* **Audit Summary**: 0 Red Flags | 1 Cautions | 1 Positive Signals
+* **Audit Coverage**: **2 / 6 Audits Evaluated (Burn Multiple Efficiency, Technical Team Composition)**
+* **Skipped Audits (Data Gaps)**: TAM Market Sizing, Gross Margin & COGS, CAC Payback Period, Valuation ARR Multiple
+* **Audit Summary**: 0 Red Flags | 1 Cautions | 2 Positive Signals
 
 ---
 
@@ -18,11 +18,11 @@
 
 | Metric | Startup Claim | Venture Benchmark | Status |
 | :--- | :--- | :--- | :--- |
-| **ARR / Revenue** | $1.20M | > $1.0M for Series A | 🟢 Disclosed |
+| **ARR / Revenue** | $1.40M | > $1.0M for Series A | 🟢 Disclosed |
 | **Gross Margin** | N/A | >= 75% for Enterprise Software | ⚠️ Undisclosed (Data Gap) |
 | **CAC Payback** | N/A | < 12 Months | ⚠️ Undisclosed (Data Gap) |
-| **Burn Multiple** | N/A | < 1.0x Elite / 1.0x-2.0x Good | ⚠️ Undisclosed (Data Gap) |
-| **Runway** | N/A | 18 - 24 Months Recommended | ⚠️ Undisclosed (Data Gap) |
+| **Burn Multiple** | 0.95x | < 1.0x Elite / 1.0x-2.0x Good | 🟢 Elite |
+| **Runway** | 20.0 mo | 18 - 24 Months Recommended | 🟢 Safe |
 
 ---
 
@@ -32,9 +32,10 @@
 * *None identified under current metrics disclosure.*
 
 #### ⚠️ Cautionary Observations
-* **Transparency & Data Gaps (Undisclosed Metrics in Pitch Deck (5 missing))**: The pitch deck does not disclose: claimed_gross_margin_pct, claimed_cac_usd, claimed_arpu_monthly_usd, monthly_net_burn_usd, claimed_tam_usd.
+* **Transparency & Data Gaps (Undisclosed Metrics in Pitch Deck (4 missing))**: The pitch deck does not disclose: claimed_gross_margin_pct, claimed_cac_usd, claimed_arpu_monthly_usd, claimed_tam_usd.
 
 #### 🟢 Validated Strengths & Positive Signals
+* **Capital Efficiency (Burn Multiple)**: Burn Multiple is 0.95x (Top-decile capital discipline).
 * **Team Composition**: Founding team has verified engineering / systems leadership.
 
 ---

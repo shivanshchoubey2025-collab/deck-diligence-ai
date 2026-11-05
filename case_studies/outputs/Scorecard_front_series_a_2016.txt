@@ -2,13 +2,17 @@
  DECKDILIGENCE.AI SCREENING SCORECARD: FRONT
  Sector: Enterprise Software / B2B SaaS | Stage: Series A | Post-Money: $0.0M
 ==============================================================================
- HEALTH SCORE: 75/100 | RED FLAGS: 0 | CAUTIONS: 1 | POSITIVE: 1
- AUDIT COVERAGE: 1/6 Audits Evaluated (5 Skipped Due to Data Gaps)
+ HEALTH SCORE: 75/100 | RED FLAGS: 0 | CAUTIONS: 1 | POSITIVE: 2
+ AUDIT COVERAGE: 2/6 Audits Evaluated (4 Skipped Due to Data Gaps)
  VERDICT: INSUFFICIENT DATA / REFUSE VERDICT
 ------------------------------------------------------------------------------
-⚠️ [CAUTION] Transparency & Data Gaps — Undisclosed Metrics in Pitch Deck (5 missing)
-   Finding: The pitch deck does not disclose: claimed_gross_margin_pct, claimed_cac_usd, claimed_arpu_monthly_usd, monthly_net_burn_usd, claimed_tam_usd.
+⚠️ [CAUTION] Transparency & Data Gaps — Undisclosed Metrics in Pitch Deck (4 missing)
+   Finding: The pitch deck does not disclose: claimed_gross_margin_pct, claimed_cac_usd, claimed_arpu_monthly_usd, claimed_tam_usd.
    VC Benchmark: Standard venture decks disclose ARR, CAC, monthly gross margin, net burn, and customer churn.
+
+🟢 [POSITIVE] Capital Efficiency (Burn Multiple) — Elite Capital Efficiency (<= 1.0x Burn Multiple)
+   Finding: Burn Multiple is 0.95x (Top-decile capital discipline).
+   VC Benchmark: < 1.0x represents elite capital allocation.
 
 🟢 [POSITIVE] Team Composition — In-House Technical Leadership
    Finding: Founding team has verified engineering / systems leadership.
