@@ -15,6 +15,7 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 
 ### 1. 🔍 Quantitative Sanity Auditor (`deck_screener.py`)
 - Cross-references claimed startup metrics against venture benchmarks:
+  - **Audit Coverage & Refusal**: Enforces a minimum quantitative coverage threshold ($\ge 3$ of 6 sanity audits required to render an IC verdict; fewer than 3 triggers an explicit `INSUFFICIENT DATA / REFUSE VERDICT`).
   - **TAM Reality Check**: Flags top-down vs. bottom-up market sizing disconnects ($>10\times$ disparity triggers red flag; $4\times\text{--}10\times$ triggers caution).
   - **Gross Margin Diligence**: Flags pure API pass-through GenAI wrappers claiming $>80\%$ gross margins without local inference layers.
   - **CAC Payback Velocity**: Categorizes customer acquisition payback into $<12\text{ mo}$ (Elite), $12\text{--}18\text{ mo}$ (Moderate), and $>18\text{ mo}$ (Sluggish).
@@ -63,7 +64,11 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 ├── sample_deck_fluff.json         # Test Case 2: Hype-driven AI wrapper
 ├── test_cap_table_waterfall.py    # Unit tests for Cap Table & Waterfall Engine (incl. 400-point sweep)
 ├── test_deck_screener.py          # Unit tests for Pitch Deck Screener & Sanity Auditor
+├── test_perturbations.py          # Controlled 6-variable audit perturbation test suite
 ├── test_tech_moat_scanner.py      # Unit tests for AST & Dependency Auditor
+├── VALIDATION.md                  # Pre-registered validation protocol & 8-case backtesting report
+├── templates/                     # Objective extraction schemas & slide citation templates
+│   └── deck_extraction_template.json
 ├── requirements.txt               # Pinned dependencies
 ├── LICENSE                        # MIT License
 ├── .github/workflows/tests.yml    # Continuous Integration (CI) Pytest Workflow
@@ -80,11 +85,20 @@ The toolkit automates preliminary quantitative sanity audits on pitch deck claim
 
 ## 🧪 Running the Unit Test Suite
 
-Run the full pytest suite (15 automated test cases covering mathematical invariants, AST parsing, and threshold boundaries):
+Run the full pytest suite (23 automated test cases covering mathematical invariants, AST parsing, threshold boundaries, audit coverage refusal, and single-variable perturbation isolation):
 
 ```bash
 pytest -v
 ```
+
+---
+
+## 📋 Model Validation & Backtesting
+
+See [`VALIDATION.md`](VALIDATION.md) for the complete pre-registered validation protocol (frozen under git tag `v0.1-validation`), including:
+1. **Perturbation Test Suite**: Verification of audit orthogonality (6 single-variable perturbations flipping strictly the targeted audit with zero cross-contamination).
+2. **Balanced 8-Case Backtesting Dataset**: Front (2016 Series A), Segment (2015 Series B), Fast.co (2020 Series A), WeWork (2014 S-1), Jasper AI (2022 Series A), Mixpanel (2012 Series A), Coinbase (2012 Seed — Out of Scope), and Theranos (2006 — Data Void).
+3. **What Held Up vs. Known Failure Modes**: Analysis of category-creation TAM penalties and seed-stage burn multiple variance.
 
 ---
 

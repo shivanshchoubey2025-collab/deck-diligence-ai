@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DeckDiligenceExtractionTemplate",
+  "description": "Standardized schema for objective pitch deck quantitative extraction. Use null for any undisclosed metric (never extrapolate or invent defaults). Record slide citations for auditability.",
+  "metadata": {
+    "deck_title": "Example Pitch Deck",
+    "analyst_name": "Shivansh Choubey",
+    "extraction_date": "2026-11-05",
+    "version": "v0.1-validation"
+  },
+  "company_overview": {
+    "company_name": "Example Corp",
+    "tagline": "Brief description of company value proposition",
+    "sector": "Enterprise Software",
+    "stage": "Series A",
+    "funding_ask_usd": null,
+    "claimed_post_money_valuation_usd": null,
+    "slide_citations": {
+      "funding_ask": "Slide 14",
+      "valuation": "Slide 14"
+    }
+  },
+  "team": [
+    {
+      "name": "Jane Doe",
+      "role": "CEO & Co-Founder",
+      "background": "Ex-Product Lead at Stripe; BS Computer Science (MIT).",
+      "slide_citation": "Slide 12"
+    },
+    {
+      "name": "John Smith",
+      "role": "CTO & Co-Founder",
+      "background": "Ex-Staff Infrastructure Engineer at Datadog; MS CS (CMU).",
+      "slide_citation": "Slide 12"
+    }
+  ],
+  "claimed_metrics": {
+    "arr_usd": null,
+    "arr_citation": "Slide 8",
+
+    "net_new_arr_last_12m_usd": null,
+    "net_new_arr_citation": "Slide 8",
+
+    "monthly_net_burn_usd": null,
+    "burn_citation": "Slide 9",
+
+    "cash_in_bank_usd": null,
+    "cash_citation": "Slide 9",
+
+    "claimed_gross_margin_pct": null,
+    "gross_margin_citation": "Slide 10",
+
+    "claimed_monthly_churn_pct": null,
+    "churn_citation": "Slide 10",
+
+    "claimed_cac_usd": null,
+    "cac_citation": "Slide 11",
+
+    "claimed_arpu_monthly_usd": null,
+    "arpu_citation": "Slide 11",
+
+    "claimed_tam_usd": null,
+    "tam_citation": "Slide 4",
+
+    "target_customer_count_global": null,
+    "target_customers_citation": "Slide 4",
+
+    "uses_third_party_llm_apis": false,
+    "has_local_fine_tuned_models": false,
+    "ai_architecture_citation": "Slide 6"
+  },
+  "extraction_rules": {
+    "rule_1_zero_hindsight": "Extract metrics strictly as presented on the deck slides. Do not adjust for subsequent company outcomes.",
+    "rule_2_explicit_nulls": "If a metric is not stated on any slide, record it explicitly as null. Do not infer ARR from GMV or estimate churn.",
+    "rule_3_units": "Enter currency in nominal USD (e.g. $1.5M ARR = 1500000). Enter percentages as fractions (e.g. 75% gross margin = 0.75; 1.5% monthly churn = 0.015).",
+    "rule_4_citations": "Every disclosed quantitative metric must cite the exact slide number where the claim appears."
+  }
+}

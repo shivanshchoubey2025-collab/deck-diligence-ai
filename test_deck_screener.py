@@ -105,3 +105,34 @@ def test_valuation_multiple_no_deadzones():
     val_flags = [f for f in s.flags if f.category == "Valuation Discipline"]
     assert len(val_flags) == 1
     assert val_flags[0].severity == "YELLOW"
+
+
+def test_audit_coverage_threshold_refuses_verdict():
+    """
+    Decks with fewer than 3 quantifiable audits must NOT receive an arbitrary Pass or Fail;
+    they must trigger an explicit 'INSUFFICIENT DATA / REFUSE VERDICT'.
+    """
+    sparse_deck = {
+        "company_name": "Undisclosed Stealth Inc",
+        "stage": "Seed",
+        "claimed_metrics": {}
+    }
+    s = PitchDeckScreener(sparse_deck)
+    s.compute_derived_metrics()
+    s.run_sanity_audits()
+
+    assert s.audits_run_count < 3
+    verdict, rationale = s.get_verdict()
+    assert verdict == "INSUFFICIENT DATA / REFUSE VERDICT"
+    assert "Fewer than 3 of 6 sanity audits could be evaluated" in rationale
+
+    temp_memo = "temp_sparse_memo.md"
+    try:
+        s.generate_markdown_memo(temp_memo)
+        with open(temp_memo, "r", encoding="utf-8") as f:
+            content = f.read()
+        assert "INSUFFICIENT DATA / REFUSE VERDICT" in content
+        assert "Audit Coverage" in content
+    finally:
+        if os.path.exists(temp_memo):
+            os.remove(temp_memo)

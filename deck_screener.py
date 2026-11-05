@@ -43,6 +43,9 @@ class PitchDeckScreener:
         self.computed: Dict[str, Optional[float]] = {}
         self.flags: List[AuditFlag] = []
         self.health_score: int = 100
+        self.audits_run_count: int = 0
+        self.audits_run_names: List[str] = []
+        self.audits_skipped_names: List[str] = []
 
     def compute_derived_metrics(self):
         """
@@ -141,6 +144,8 @@ class PitchDeckScreener:
     def run_sanity_audits(self):
         """Runs the 6-point Heuristic Auditor without threshold dead-zones."""
         self.flags = []
+        self.audits_run_names = []
+        self.audits_skipped_names = []
         score = 100
 
         # ---------------------------------------------------------------------------------
@@ -164,6 +169,7 @@ class PitchDeckScreener:
         bottom_up_tam = self.computed["bottom_up_tam"]
 
         if claimed_tam is not None and bottom_up_tam is not None and bottom_up_tam > 0:
+            self.audits_run_names.append("TAM Market Sizing")
             disparity_ratio = claimed_tam / bottom_up_tam
 
             if disparity_ratio > 10.0:
@@ -195,6 +201,8 @@ class PitchDeckScreener:
                     benchmark="Bottom-up TAM within realistic bounds of serviceable market.",
                     impact="Signals analytical honesty from the founding team."
                 ))
+        else:
+            self.audits_skipped_names.append("TAM Market Sizing")
 
         # ---------------------------------------------------------------------------------
         # AUDIT 2: AI Token Pass-Through vs. Claimed Gross Margin
@@ -204,6 +212,7 @@ class PitchDeckScreener:
         claimed_margin = self.computed["gross_margin"]
 
         if claimed_margin is not None:
+            self.audits_run_names.append("Gross Margin & COGS")
             if uses_apis and not has_local_models and claimed_margin >= 0.80:
                 score -= 20
                 self.flags.append(AuditFlag(
@@ -233,12 +242,15 @@ class PitchDeckScreener:
                     benchmark="Software businesses require >= 70% gross margin to compound sustainably.",
                     impact="Dramatically reduces customer lifetime value (LTV)."
                 ))
+        else:
+            self.audits_skipped_names.append("Gross Margin & COGS")
 
         # ---------------------------------------------------------------------------------
         # AUDIT 3: CAC Payback Period (No Dead Zones: <12, 12-18, >18)
         # ---------------------------------------------------------------------------------
         payback = self.computed["cac_payback_months"]
         if payback is not None:
+            self.audits_run_names.append("CAC Payback Period")
             if payback > 18.0:
                 score -= 20
                 self.flags.append(AuditFlag(
@@ -268,12 +280,15 @@ class PitchDeckScreener:
                     benchmark="Best-in-class venture benchmark: < 12 months.",
                     impact="Enables the company to scale efficiently without burning excessive capital."
                 ))
+        else:
+            self.audits_skipped_names.append("CAC Payback Period")
 
         # ---------------------------------------------------------------------------------
         # AUDIT 4: Burn Multiple (David Sacks / Craft Ventures: <=1.0, 1.0-2.0, >2.0)
         # ---------------------------------------------------------------------------------
         burn_mult = self.computed["burn_multiple"]
         if burn_mult is not None:
+            self.audits_run_names.append("Burn Multiple Efficiency")
             # Stage context: At very early seed, burn multiple has high variance
             stage_note = " (Note: Burn multiple at Seed stage has high variance before full GTM motion)" if "seed" in self.stage.lower() else ""
             
@@ -305,6 +320,8 @@ class PitchDeckScreener:
                     benchmark="< 1.0x represents elite capital allocation.",
                     impact="Strong signal of product-market fit pulling demand rather than sales-led cash burning."
                 ))
+        else:
+            self.audits_skipped_names.append("Burn Multiple Efficiency")
 
         # ---------------------------------------------------------------------------------
         # AUDIT 5: Valuation-to-ARR Multiple Discipline (No Dead-Zones: <=20, 20-30, >30)
@@ -312,6 +329,7 @@ class PitchDeckScreener:
         val_multiple = self.computed["valuation_arr_multiple"]
         arr = self.computed["arr"]
         if val_multiple is not None and arr is not None and arr > 0:
+            self.audits_run_names.append("Valuation ARR Multiple")
             if val_multiple > 30.0:
                 score -= 15
                 self.flags.append(AuditFlag(
@@ -340,41 +358,63 @@ class PitchDeckScreener:
                     benchmark="Disciplined venture range: 15x - 25x ARR.",
                     impact="Enables attractive risk-adjusted entry valuation and sustainable Series A step-ups."
                 ))
+        else:
+            self.audits_skipped_names.append("Valuation ARR Multiple")
 
         # ---------------------------------------------------------------------------------
         # AUDIT 6: Technical Founder / Architecture Moat
         # ---------------------------------------------------------------------------------
-        has_tech_founder = any(
-            ("cto" in m.get("role", "").lower() or "tech" in m.get("role", "").lower() or "engineer" in m.get("background", "").lower())
-            for m in self.team
-        )
-        is_deep_tech = "ai" in self.sector.lower() or "infrastructure" in self.sector.lower()
+        if not self.team:
+            self.audits_skipped_names.append("Technical Team Composition")
+        else:
+            self.audits_run_names.append("Technical Team Composition")
+            has_tech_founder = any(
+                ("cto" in m.get("role", "").lower() or "tech" in m.get("role", "").lower() or "engineer" in m.get("background", "").lower())
+                for m in self.team
+            )
+            is_deep_tech = "ai" in self.sector.lower() or "infrastructure" in self.sector.lower()
 
-        if is_deep_tech and not has_tech_founder:
-            score -= 20
-            self.flags.append(AuditFlag(
-                category="Team Composition",
-                severity="RED",
-                title="No Technical Co-Founder in Deep Tech / AI Startup",
-                finding="The startup operates in deep AI/infrastructure without an in-house engineering co-founder or CTO.",
-                benchmark="Deep tech and systems AI startups require in-house technical leadership to own model weights and architecture.",
-                impact="Extreme risk of building superficial wrappers, high contractor burn, and inability to build proprietary IP."
-            ))
-        elif has_tech_founder:
-            self.flags.append(AuditFlag(
-                category="Team Composition",
-                severity="GREEN",
-                title="In-House Technical Leadership",
-                finding="Founding team has verified engineering / systems leadership.",
-                benchmark="Essential for software and deep tech venture execution.",
-                impact="Reduces execution risk and accelerates proprietary R&D."
-            ))
+            if is_deep_tech and not has_tech_founder:
+                score -= 20
+                self.flags.append(AuditFlag(
+                    category="Team Composition",
+                    severity="RED",
+                    title="No Technical Co-Founder in Deep Tech / AI Startup",
+                    finding="The startup operates in deep AI/infrastructure without an in-house engineering co-founder or CTO.",
+                    benchmark="Deep tech and systems AI startups require in-house technical leadership to own model weights and architecture.",
+                    impact="Extreme risk of building superficial wrappers, high contractor burn, and inability to build proprietary IP."
+                ))
+            elif has_tech_founder:
+                self.flags.append(AuditFlag(
+                    category="Team Composition",
+                    severity="GREEN",
+                    title="In-House Technical Leadership",
+                    finding="Founding team has verified engineering / systems leadership.",
+                    benchmark="Essential for software and deep tech venture execution.",
+                    impact="Reduces execution risk and accelerates proprietary R&D."
+                ))
+            else:
+                self.flags.append(AuditFlag(
+                    category="Team Composition",
+                    severity="YELLOW",
+                    title="Non-Technical Team in Tech Venture",
+                    finding="Founding team lacks documented in-house software engineering background.",
+                    benchmark="Software startups benefit heavily from technical founders.",
+                    impact="May require hiring senior engineering talent early."
+                ))
 
+        self.audits_run_count = len(self.audits_run_names)
         self.health_score = max(5, min(100, score))
         return self.flags
 
     def get_verdict(self) -> Tuple[str, str]:
         """Returns the high-level screening recommendation and action plan."""
+        if self.audits_run_count < 3:
+            return (
+                "INSUFFICIENT DATA / REFUSE VERDICT",
+                f"Fewer than 3 of 6 sanity audits could be evaluated ({self.audits_run_count}/6 evaluated). "
+                "Pitch deck lacks minimum quantitative disclosures (e.g., ARR, Margins, Burn, CAC) to render an IC recommendation."
+            )
         red_flags = [f for f in self.flags if f.severity == "RED"]
         if self.health_score >= 75 and len(red_flags) == 0:
             return "INVEST / ADVANCE TO DEEP DIVE", "Founding team exhibits strong discipline, defensible unit economics, and sane valuation expectations. Schedule partner deep-dive."
@@ -392,9 +432,8 @@ class PitchDeckScreener:
         yellow_count = sum(1 for f in self.flags if f.severity == "YELLOW")
         green_count = sum(1 for f in self.flags if f.severity == "GREEN")
 
-        verdict = "INVEST / ADVANCE TO DEEP DIVE" if self.health_score >= 75 and red_count == 0 else (
-            "EXPLORE WITH CAUTION" if self.health_score >= 50 and red_count <= 1 else "PASS / REJECT"
-        )
+        verdict_tuple = self.get_verdict()
+        verdict = verdict_tuple[0]
 
         output = []
         output.append("=" * 78)
@@ -402,6 +441,7 @@ class PitchDeckScreener:
         output.append(f" Sector: {self.sector} | Stage: {self.stage} | Post-Money: ${self.post_money_usd/1e6:.1f}M")
         output.append("=" * 78)
         output.append(f" HEALTH SCORE: {self.health_score}/100 | RED FLAGS: {red_count} | CAUTIONS: {yellow_count} | POSITIVE: {green_count}")
+        output.append(f" AUDIT COVERAGE: {self.audits_run_count}/6 Audits Evaluated ({len(self.audits_skipped_names)} Skipped Due to Data Gaps)")
         output.append(f" VERDICT: {verdict}")
         output.append("-" * 78)
         
@@ -424,9 +464,17 @@ class PitchDeckScreener:
         cautions = [f for f in self.flags if f.severity == "YELLOW"]
         positives = [f for f in self.flags if f.severity == "GREEN"]
 
-        verdict = "ADVANCE TO PARTNER MEETING" if self.health_score >= 75 and len(red_flags) == 0 else (
-            "REQUEST UNIT ECONOMIC DATA ROOM" if self.health_score >= 50 and len(red_flags) <= 1 else "PASS — FUND HEURISTIC BREACH"
-        )
+        if self.audits_run_count < 3:
+            verdict = "INSUFFICIENT DATA / REFUSE VERDICT"
+        elif self.health_score >= 75 and len(red_flags) == 0:
+            verdict = "ADVANCE TO PARTNER MEETING"
+        elif self.health_score >= 50 and len(red_flags) <= 1:
+            verdict = "REQUEST UNIT ECONOMIC DATA ROOM"
+        else:
+            verdict = "PASS — FUND HEURISTIC BREACH"
+
+        coverage_summary = f"{self.audits_run_count} / 6 Audits Evaluated ({', '.join(self.audits_run_names) if self.audits_run_names else 'None'})"
+        skipped_summary = f"{', '.join(self.audits_skipped_names) if self.audits_skipped_names else 'None'}"
 
         md = f"""# INVESTMENT COMMITTEE (IC) SCREENING MEMO
 **Company**: {self.company_name} | **Stage**: {self.stage} | **Sector**: {self.sector}  
@@ -438,6 +486,8 @@ class PitchDeckScreener:
 ### 1. EXECUTIVE VERDICT & SCORE
 * **Diligence Health Score**: **{self.health_score} / 100**
 * **IC Recommendation**: **{verdict}**
+* **Audit Coverage**: **{coverage_summary}**
+* **Skipped Audits (Data Gaps)**: {skipped_summary}
 * **Audit Summary**: {len(red_flags)} Red Flags | {len(cautions)} Cautions | {len(positives)} Positive Signals
 
 ---

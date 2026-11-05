@@ -8,13 +8,15 @@
 ### 1. EXECUTIVE VERDICT & SCORE
 * **Diligence Health Score**: **80 / 100**
 * **IC Recommendation**: **REQUEST UNIT ECONOMIC DATA ROOM**
+* **Audit Coverage**: **6 / 6 Audits Evaluated (TAM Market Sizing, Gross Margin & COGS, CAC Payback Period, Burn Multiple Efficiency, Valuation ARR Multiple, Technical Team Composition)**
+* **Skipped Audits (Data Gaps)**: None
 * **Audit Summary**: 1 Red Flags | 0 Cautions | 5 Positive Signals
 
 ---
 
 ### 2. QUANTITATIVE UNIT ECONOMICS BENCHMARKING
 
-| Metric | Startup Claim | Institutional Benchmark | Status |
+| Metric | Startup Claim | Venture Benchmark | Status |
 | :--- | :--- | :--- | :--- |
 | **ARR / Revenue** | $1.02M | > $1.0M for Series A | 🟢 Disclosed |
 | **Gross Margin** | 91.0% | >= 75% for Enterprise Software | 🟢 Pass |
